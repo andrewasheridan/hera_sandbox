@@ -130,9 +130,10 @@ def sheridan_train(X_train, y_train,
                                                           feed_dict = {network.X: X_train,
                                                                        network.y: y_train,
                                                                        network.keep_prob : 1.00,
-                                                                       network.image_buf: gen_plot(prediction_scaled_test, y_train, output_scaler)})
+                                                                       network.image_buf: gen_plot(prediction_scaled_test,
+                                                                                                   y_train, output_scaler)})
             training_writer.add_summary(training_summary, epoch)
-            testing_writer.flush()  
+            training_writer.flush()  
         
              # testing summaries
             prediction_scaled_test = session.run(network.prediction,
@@ -143,9 +144,10 @@ def sheridan_train(X_train, y_train,
                                                         feed_dict = {network.X: X_test,
                                                                      network.y: y_test,
                                                                      network.keep_prob : 1.00,
-                                                                     network.image_buf: gen_plot(prediction_scaled_test, y_test, output_scaler)})
+                                                                     network.image_buf: gen_plot(prediction_scaled_test,
+                                                                                                 y_test, output_scaler)})
             testing_writer.add_summary(testing_summary, epoch)
-            training_writer.flush()
+            testing_writer.flush()
 
             # message
             sys.stdout.write('\repoch: {:4.0f} -- testing_cost: {:2.10f} -- batch:'.format(epoch, testing_cost))
