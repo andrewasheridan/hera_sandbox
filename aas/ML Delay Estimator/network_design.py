@@ -1,9 +1,9 @@
 import tensorflow as tf
 
-class delay_estimator_network(object):
+class faora(object):
     
-    def __init__(self, layer_nodes, number_of_inputs, number_of_outputs, learning_rate):
-        
+    def __init__(self, layer_nodes = [512, 256, 128, 128, 128, 64, 64, 32, 32], number_of_inputs = 1024, number_of_outputs = 1, learning_rate = 0.00001):
+
         tf.reset_default_graph()
         
         with tf.variable_scope('input_X'):
