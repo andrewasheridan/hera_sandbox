@@ -83,8 +83,8 @@ class Quad_Path_Layer(object):
 
             t = tf.nn.conv2d(t, self._trainable('filters', filter_shape),strides,'SAME')
             t = self._bias_add_scope(t, [filter_shape[-1]])
-            t = tf.contrib.layers.batch_norm(t, is_training = self.is_training)
             t = tf.nn.relu(t)
+            t = tf.contrib.layers.batch_norm(t, is_training = self.is_training)
             t = tf.nn.dropout(t, self.conv_keep_prob)
 
         return t
