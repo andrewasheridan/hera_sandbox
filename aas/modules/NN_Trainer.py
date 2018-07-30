@@ -18,9 +18,10 @@ class NN_Trainer(Restoreable_Component):
                  log_dir,
                  model_save_interval,
                  pretrained_model_path,
-                 metric_names):
+                 metric_names,
+                 verbose = True):
     
-        Restoreable_Component.__init__(self, name=network.name, log_dir=log_dir)
+        Restoreable_Component.__init__(self, name=network.name, log_dir=log_dir, verbose=verbose)
         
         self._network = network   
         self._Data_Creator = Data_Creator
@@ -52,11 +53,17 @@ class NN_Trainer(Restoreable_Component):
         self._test_batcher.gen_data()
         
     def save_metrics(self):
+        self._msg = '\rsaving metrics'; self._vprint(self._msg)
         direc = self.log_dir + self._network.name + '/'
 
         if not os.path.exists(direc): # should already exist by this point buuuuuut
+            self._msg += ' - creating new directory ';self._vprint(self._msg)
+            
             os.makedirs(direc)
         np.savez(direc + 'metrics', self.get_metrics()) 
+        
+        self._msg += ' - saved';self._vprint(self._msg)
+        
         
     def get_metrics(self):
         return {self.metric_names[i] : self._metrics[i] for i in range(len(self._metrics))}
