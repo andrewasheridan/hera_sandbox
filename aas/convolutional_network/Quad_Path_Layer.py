@@ -5,6 +5,32 @@ import numpy as np
 import tensorflow as tf
 
 class Quad_Path_Layer(object):
+    """A layer for a convolutional network. Layer is made of four paths: Average, Max, Wide, Narrow.
+
+        Average - Average pool followed by a 1x1 convolution.
+        Max - Max pool followed by a 1x1 convolution.
+        Wide - 1x1 convolution followed by 1xWide convoltuion.
+        Narrow - 1x1 convolution followed 1x(Wide/2) convolution.
+
+       Args:
+            
+            t - (tensor) - incoming sample or previous layers output
+            layer_name (string) - the scope name for this layer (for tensorboard)
+            wide_convolution_filter_width - (int) - width of the Wide paths convolution filters.
+                - (Narrow paths filters are set to wide_convolution_filter_width / 2)
+            num_1x1_conv_filters - (int) - Number of filters for all the 1x1 convolutions.
+                - (Number of narrow filters = num_1x1_conv_filters / 2)
+                - (Number of wide filters = num_1x1_conv_filters/2/2)
+            conv_keep_prob - (float) - Keep probability for convolutions
+            is_training - (bool) - Flag for training (for batch normalization)
+            dtype - (tf.float32) - Data dtype
+
+        Returns:
+
+            (tensor) - Concatenated filters of the four paths.
+
+
+       """
     
     def __init__(self,
                  t,
