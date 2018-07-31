@@ -20,7 +20,6 @@ class CNN_DS_BN_BC(Restoreable_Component):
     def __init__(self,
                  name,
                  num_downsamples,
-                 layer_downsampling_factors, 
                  log_dir = 'logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
@@ -29,7 +28,6 @@ class CNN_DS_BN_BC(Restoreable_Component):
         Restoreable_Component.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.num_downsamples = num_downsamples
-        self.layer_downsampling_factors = layer_downsampling_factors
         
         self.dtype = dtype
         self.adam_initial_learning_rate = adam_initial_learning_rate
@@ -126,7 +124,7 @@ class CNN_DS_BN_BC(Restoreable_Component):
         with tf.variable_scope('logits'):
             self._msg += '.'; self._vprint(self._msg)
             
-            self._logits = tf.contrib.layers.fully_connected(self._layers[-1], self._num_classes, activation_fn = None)
+            self._logits = tf.contrib.layers.fully_connected(tf.layers.flatten(self._layers[-1]), self._num_classes, activation_fn = None)
 
         with tf.variable_scope('predictions'):
             self._msg += '.'; self._vprint(self._msg)
