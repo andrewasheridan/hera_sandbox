@@ -9,6 +9,22 @@ import numpy as np
 import os, io
 
 class NN_Trainer(Restoreable_Component):
+    """Skeleton for restoreable neural network trainer (does not include training method).
+        Should be able to add different train methods to this for different network styles.
+
+        Args
+
+            network - (one of the network classes from this repo) - The network to train
+            Data_Creator - (one of the Data_Creator_* classes from this repo) - Creates data..
+            num_epochs - (int) - Number of training epochs
+            batch_size - (int) - Number of samples in each batch
+                - Number of batches = int(number_of_samples/batch_size)
+            log_dir - (string) - Directory to store logs & parameters
+            model_save_interval - (int) - Save model every (this many) epochs
+            pretrained_model_path - (string) - Path to previously trained model
+            metric_names - (list of strings) - Names of the various metrics for this trainer
+            verbose - (bool) - Be verbose.
+    """
     
     def __init__(self,
                  network,
