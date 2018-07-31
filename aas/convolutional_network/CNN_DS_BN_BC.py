@@ -17,7 +17,7 @@ class CNN_DS_BN_BC(Restoreable_Component):
 
        TODO: Provide example of sizes of fcls."""
 
-	    def __init__(self,
+    def __init__(self,
                  name,
                  num_downsamples,
                  layer_downsampling_factors, 
@@ -42,7 +42,7 @@ class CNN_DS_BN_BC(Restoreable_Component):
 
     def create_graph(self):
 
-        self._save_params()
+        self.save_params()
         self._msg = '\rcreating network graph '; self._vprint(self._msg)
 
         
@@ -69,7 +69,7 @@ class CNN_DS_BN_BC(Restoreable_Component):
                                                          shape = shape,
                                                          initializer = tf.contrib.layers.xavier_initializer())
         for i in range(self.num_downsamples):
-            self._msg += ' {}'.format(i); self._vprint(self._msg)
+            self._msg += '.'; self._vprint(self._msg)
             
             with tf.variable_scope('conv_layer_{}'.format(i)):
 
@@ -152,7 +152,7 @@ class CNN_DS_BN_BC(Restoreable_Component):
             with tf.variable_scope('train'):
                 
                 self._msg += '.'; self._vprint(self._msg)
-                self.optimizer = tf.train.AdamOptimizer(self.adam_inital_learning_rate, epsilon=self.adam_epsilon).minimize(self.cost)
+                self.optimizer = tf.train.AdamOptimizer(self.adam_initial_learning_rate, epsilon=1e-8).minimize(self.cost)
             
         with tf.variable_scope('logging'):
             self._msg += '.'; self._vprint(self._msg)
