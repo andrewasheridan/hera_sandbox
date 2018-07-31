@@ -110,7 +110,7 @@ class NN_Trainer(Restoreable_Component):
         for i, ax in enumerate(axes.reshape(-1)):
 
             if i == 0:
-                ax.set_title('{}'.format(self.network.name))
+                ax.set_title('{}'.format(self._network.name))
 
             ax.plot(xvals[:num_vals], self._metrics[i][:num_vals], lw = 0.5)
             ax.set_xlabel('Epoch')
