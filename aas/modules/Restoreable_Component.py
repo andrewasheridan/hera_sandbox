@@ -16,8 +16,7 @@ class Restoreable_Component(object):
     def __init__(self, name, log_dir = 'logs/', verbose = True):
         self.name = name
         self.log_dir = log_dir
-        self.verbose = verbose
-        self._vprint = sys.stdout.write if self._verbose else lambda *a, **k: None
+        self._vprint = sys.stdout.write if verbose else lambda *a, **k: None
         self._msg = ''
         
         
