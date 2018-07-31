@@ -21,7 +21,7 @@ class CNN_DS_BN_R(Restoreable_Component):
         Leaky_ReLU and batch normalization is applied after each convolution. Downsamples convolutions have dropout.
         Biases are added before activations.
 
-        Output of last layer is fed to fully connected layer (with no activation)
+        Output of last layer is fed to fully connected layer with relu activation
 
         Cost function is mean squared error
 
@@ -33,6 +33,8 @@ class CNN_DS_BN_R(Restoreable_Component):
                  log_dir = 'logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
+                 accuracy_threshold = 0.00625,
+                 gaussian_shift_scalar = 1e-5,
                  verbose = True):
     
         Restoreable_Component.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
@@ -41,6 +43,7 @@ class CNN_DS_BN_R(Restoreable_Component):
         
         self.dtype = dtype
         self.adam_initial_learning_rate = adam_initial_learning_rate
+        self.gaussian_shift_scalar = gaussian_shift_scalar
         
 
         self._num_freq_channels = 1024
@@ -154,12 +157,12 @@ class CNN_DS_BN_R(Restoreable_Component):
             with tf.variable_scope('mean_squared_error'):
                 self._msg += '.'; self._vprint(self._msg)
                 
-                self.MSE = tf.reduce_mean(squared_error)
+                self.MSE = tf.reduce_mean(squared_error * self.gaussian_shift_scalar)
                 
             with tf.variable_scope('mean_quad_error'):
                 self._msg += '.'; self._vprint(self._msg)
                 
-                self.MQE = tf.reduce_mean(quad_error)
+                self.MQE = tf.reduce_mean(quad_error * self.gaussian_shift_scalar)
 
         with tf.variable_scope('logging'):  
 
