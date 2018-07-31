@@ -43,6 +43,7 @@ class CNN_DS_BN_R(Restoreable_Component):
         
         self.dtype = dtype
         self.adam_initial_learning_rate = adam_initial_learning_rate
+        self.accuracy_threshold = accuracy_threshold
         self.gaussian_shift_scalar = gaussian_shift_scalar
         
 
