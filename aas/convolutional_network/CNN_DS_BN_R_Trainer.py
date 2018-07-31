@@ -160,7 +160,6 @@ class CNN_DS_BN_R_Trainer(NN_Trainer):
                                       feed_dict = {self._network.X: testing_inputs.reshape(-1,1,1024,1),
                                                    self._network.sample_keep_prob : 1.,
                                                    self._network.downsample_keep_prob : 1.,
-                                                   self._network.pred_keep_prob : 1.,
                                                    self._network.is_training : False}) 
 
                     test_feed_dict = {self._network.X: testing_inputs.reshape(-1,1,1024,1),
