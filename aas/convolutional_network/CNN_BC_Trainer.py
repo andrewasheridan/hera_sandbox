@@ -59,7 +59,7 @@ class CNN_BC_Trainer(NN_Trainer):
             else:
                 saver.restore(session, self.pretrained_model_path)
 
-            archive_loc = self.log_dir + self.network.name
+            archive_loc = self.log_dir + self._network.name
             training_writer = tf.summary.FileWriter(archive_loc + '/training', session.graph)
             testing_writer = tf.summary.FileWriter(archive_loc + '/testing', session.graph)
             self.model_save_location = archive_loc + '/trained_model.ckpt'   
@@ -95,39 +95,39 @@ class CNN_BC_Trainer(NN_Trainer):
                         training_inputs_batch = training_inputs[j*batch_size:(j + 1)*batch_size].reshape(-1,1,1024,1)
                         training_labels_batch = training_labels[j*batch_size:(j + 1)*batch_size].reshape(-1,2)
 
-                        feed_dict = {self.network.X: training_inputs_batch,
-                                     self.network.labels: training_labels_batch,
-                                     self.network.sample_keep_prob : self.sample_keep_prob,
-                                     self.network.downsample_keep_prob : self.downsample_keep_prob,
-                                     self.network.is_training : True}
+                        feed_dict = {self._network.X: training_inputs_batch,
+                                     self._network.labels: training_labels_batch,
+                                     self._network.sample_keep_prob : self.sample_keep_prob,
+                                     self._network.downsample_keep_prob : self.downsample_keep_prob,
+                                     self._network.is_training : True}
 
-                        session.run([self.network.optimizer], feed_dict = feed_dict) 
+                        session.run([self._network.optimizer], feed_dict = feed_dict) 
                             
-                    train_feed_dict = {self.network.X: training_inputs.reshape(-1,1,1024,1),
-                                       self.network.labels: training_labels.reshape(-1,2),
-                                       self.network.sample_keep_prob : 1.,
-                                       self.network.downsample_keep_prob : 1.,
-                                       self.network.is_training : False}
+                    train_feed_dict = {self._network.X: training_inputs.reshape(-1,1,1024,1),
+                                       self._network.labels: training_labels.reshape(-1,2),
+                                       self._network.sample_keep_prob : 1.,
+                                       self._network.downsample_keep_prob : 1.,
+                                       self._network.is_training : False}
 
 
-                    training_cost, training_acc, training_summary = session.run([self.network.cost,
-                                                                                 self.network.accuracy,
-                                                                                 self.network.summary],
+                    training_cost, training_acc, training_summary = session.run([self._network.cost,
+                                                                                 self._network.accuracy,
+                                                                                 self._network.summary],
                                                                                  feed_dict = train_feed_dict) 
 
                     training_writer.add_summary(training_summary, epoch)
                     training_writer.flush()  
                 
                     
-                    test_feed_dict = {self.network.X: testing_inputs.reshape(-1,1,1024,1),
-                                      self.network.labels: testing_labels.reshape(-1,2),
-                                      self.network.sample_keep_prob : 1.,
-                                      self.network.downsample_keep_prob : 1.,
-                                      self.network.is_training : False} 
+                    test_feed_dict = {self._network.X: testing_inputs.reshape(-1,1,1024,1),
+                                      self._network.labels: testing_labels.reshape(-1,2),
+                                      self._network.sample_keep_prob : 1.,
+                                      self._network.downsample_keep_prob : 1.,
+                                      self._network.is_training : False} 
 
-                    testing_cost, testing_acc, testing_summary = session.run([self.network.cost,
-                                                                              self.network.accuracy,
-                                                                              self.network.summary],
+                    testing_cost, testing_acc, testing_summary = session.run([self._network.cost,
+                                                                              self._network.accuracy,
+                                                                              self._network.summary],
                                                                               feed_dict = test_feed_dict)
 
                     testing_writer.add_summary(testing_summary, epoch)
