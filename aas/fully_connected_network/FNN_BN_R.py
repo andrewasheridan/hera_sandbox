@@ -12,9 +12,23 @@ import numpy as np
 class FNN_BN_R(Restoreable_Component):
     """A neural network of fully connected layers.
     
-    First layer has Leaky_ReLU activation with a trainable alpha. Other layers have ReLU activation.
+    First layer has Leaky_ReLU activation. Other layers have ReLU activation.
     Input sample has dropout at rate 1 - sample_keep_prob.
-    activations have dropout at rate 1 - fcl_keep_prob.
+
+    Args
+        layer_nodes - (list of ints) - Number of nodes in each fully connected layer.
+        cost - (string) - Name of the cost function
+            - MSE, MQE, MISG, PWT_weighted_MSE, or PWT_weighted_MISG
+            - MSE - mean squared error
+            - MQE - log of mean sqaure of squared error) - experimental
+            - MISG - mean inverse shifted gaussian
+            - PWT_weighted_MSE - (PWT - 100)*MSE - experimental
+            - PWT_weighted_MISG - (PWT - 100)*MISG - experimental
+        accuracy_threshold - (float) - the value for a target to be considered 'good'
+        gaussian_shift_scalar - (float) - scalar to shift the gaussian with
+            - also scales the value of MSE and MISG for no reason
+                - because i liked the numbers to be large
+        
     """
 
     def __init__(self,
@@ -76,12 +90,6 @@ class FNN_BN_R(Restoreable_Component):
             w = tf.get_variable(name = 'weights', shape  = [1024, self.layer_nodes[0]],
                                 initializer = tf.contrib.layers.xavier_initializer())
             
-#             self.leaky_relu_alpha = tf.get_variable(shape = [],
-#                                                     name = 'leaky_relu_alpha',
-#                                                     dtype = self.dtype,
-#                                                     constraint = lambda x: tf.clip_by_value(x, 0, 0.3),
-#                                                     initializer = tf.zeros_initializer())
-            
             layer = tf.nn.leaky_relu(tf.matmul(self.X, w) + b)
             layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
             layer = tf.nn.dropout(layer, self.fcl_keep_prob)
@@ -92,8 +100,6 @@ class FNN_BN_R(Restoreable_Component):
                 with tf.variable_scope('layer_%d' %(i)):
                     layer = tf.contrib.layers.fully_connected(self._layers[i-1], self.layer_nodes[i])
                     layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
-#                     if self.layer_nodes[i] >= 256:
-#                         layer = tf.nn.dropout(layer, self.fcl_keep_prob)
                     self._layers.append(layer)
 
                               
