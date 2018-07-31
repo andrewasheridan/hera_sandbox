@@ -198,7 +198,7 @@ class CNN_DS_BN_R(Restoreable_Component):
                 if self.cost == 'MSE':
                     cost = self.MSE
                 if self.cost == 'MQE':
-                    cost = self.MQE
+                    cost = tf.log(self.MQE)
                 if self.cost == 'MISG':
                     cost = self.MISG
                 if self.cost == 'PWT_weighted_MSE':
