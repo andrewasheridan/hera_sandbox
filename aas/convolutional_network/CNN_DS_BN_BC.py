@@ -10,12 +10,22 @@ import tensorflow as tf
 import numpy as np
 
 class CNN_DS_BN_BC(Restoreable_Component):
-    """CNN: Convolutional Neural Network.
-       DS: DownSampling. Each convolution is followed by a downsampling convolution
-       BN: All non-linearalities have batch-normalization applied.
-       BC: Binary Classification, this network classifies samples of having one of two labels.
+    """ CNN: Convolutional Neural Network.
+        DS: DownSampling. Each convolution is followed by a downsampling convolution
+        BN: All non-linearalities have batch-normalization applied.
+        BC: Binary Classification, this network classifies samples of having one of two labels.
+ 
+        Each layer starts with a 1x3 convolution with 2**i filters (i = layer index) with stride of 1.
+        This is fed into a 1x5 convolution with the same number of filters, but stride of 2 (50% downsample)
 
-       TODO: Provide example of sizes of fcls."""
+        Leaky_ReLU and batch normalization is applied after each convolution. Downsamples convolutions have dropout.
+        Biases are added before activations.
+
+        Output of last layer is fed to fully connected layer (with no activation)
+
+        Cost function is softmax cross entropy
+
+       """
 
     def __init__(self,
                  name,
