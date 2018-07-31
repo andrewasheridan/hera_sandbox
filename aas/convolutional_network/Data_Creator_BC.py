@@ -5,10 +5,9 @@ sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
 from data_manipulation import *
 from Data_Creator import Data_Creator
 
-
 import numpy as np
 
-class Data_Creator_R(Data_Creator):
+class Data_Creator_BC(Data_Creator):
     """Creates data in an alternate thread. R for regression.
     
     ## usage:
@@ -87,11 +86,11 @@ class Data_Creator_R(Data_Creator):
             two_seps = [random.sample(self._bl_dict[unique_baseline], 2)][0]
 
             inputs.append(_flatness(two_seps))
-            
 
         inputs = np.angle(np.array(inputs).reshape(-1,1024) * applied_delay)
         
         permutation_index = np.random.permutation(np.arange(self._num * 60))
-        
+        labels = [[1,0] if d >=0 else [0,1] for d in targets[permutation_index]]
 
-        self._epoch_batch.append((angle_tx(inputs[permutation_index]), delay_tx(targets[permutation_index])))
+        self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels))
+
