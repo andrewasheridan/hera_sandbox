@@ -98,7 +98,7 @@ def get_good_red_bls(red_bls, gain_keys, min_group_len = 4):
             
             # Make sure groups are made from even number of seps
             #
-            # I honestly dont recall why I did this. ¯\_(ツ)_/¯ 
+            # I honestly dont recall why I did this. 
 #             if new_group_len % 2 != 0:
 #                 new_group.pop()
                 
