@@ -49,7 +49,19 @@ class NN_Trainer(Restoreable_Component):
         self._metrics = [] # list of lists
         self.metric_names = metric_names # list of strings, one per metric
 
-    def add_data(self,train_info, test_info, gains, num_flatnesses = 100, abs_min_max_delay = 0.040):
+    def add_data(self,train_info, test_info, gains, num_flatnesses = 10, abs_min_max_delay = 0.040):
+        """Adds data to the Trainer.
+
+            Args
+
+                train_info - (tuple : (visibility data, baselines dict)) - The training data
+                test_info - (tuple : (visibility data, baselines dict)) - The testing data
+                gains - (dict) - The gains for the visibilites
+                num_flatnesses - (int) - Number of flatnesses for each epoch
+                    - Number of samples is num_flatnesses * 60
+                abs_min_max_delay - (float) - The absolute value of the min or max delay for this dataset.
+
+        """
         
         self._abs_min_max_delay = abs_min_max_delay
 
@@ -69,6 +81,8 @@ class NN_Trainer(Restoreable_Component):
         self._test_batcher.gen_data()
         
     def save_metrics(self):
+        """Saves the recorded metrics to disk"""
+
         self._msg = '\rsaving metrics'; self._vprint(self._msg)
         direc = self.log_dir + self._network.name + '/'
 
@@ -82,9 +96,11 @@ class NN_Trainer(Restoreable_Component):
         
         
     def get_metrics(self):
+        """Returns the recorded metrics (list of lists)"""
         return {self.metric_names[i] : self._metrics[i] for i in range(len(self._metrics))}
 
     def plot_metrics(self,figsize = (8,6) ):
+        """Plots the recorded metrics"""
 
         num_vals = np.min([len(metric) for metric in self._metrics])
         xvals = np.arange(num_vals)
