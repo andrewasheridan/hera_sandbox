@@ -160,12 +160,12 @@ class CNN_DS_BN_R(Restoreable_Component):
             with tf.variable_scope('mean_squared_error'):
                 self._msg += '.'; self._vprint(self._msg)
                 
-                self.MSE = tf.reduce_mean(squared_error * self.gaussian_shift_scalar)
+                self.MSE = tf.reduce_mean(squared_error / self.gaussian_shift_scalar)
                 
             with tf.variable_scope('mean_quad_error'):
                 self._msg += '.'; self._vprint(self._msg)
                 
-                self.MQE = tf.reduce_mean(quad_error * self.gaussian_shift_scalar)
+                self.MQE = tf.reduce_mean(quad_error / self.gaussian_shift_scalar)
 
         with tf.variable_scope('logging'):  
 
@@ -185,6 +185,7 @@ class CNN_DS_BN_R(Restoreable_Component):
             tf.summary.histogram(name = 'predictions',values =  self.predictions)
             tf.summary.scalar(name = 'MSE', tensor = self.MSE)
             tf.summary.scalar(name = 'MISG', tensor = self.MISG)
+            tf.summary.scalar(name = 'MQE', tensor = self.MQE)
             tf.summary.scalar(name = 'PWT', tensor = self.PWT)
             tf.summary.image('prediction_vs_actual', epoch_image)
             self.summary = tf.summary.merge_all()
@@ -197,7 +198,7 @@ class CNN_DS_BN_R(Restoreable_Component):
                 if self.cost == 'MSE':
                     cost = self.MSE
                 if self.cost == 'MQE':
-                    cost = self.MSE
+                    cost = self.MQE
                 if self.cost == 'MISG':
                     cost = self.MISG
                 if self.cost == 'PWT_weighted_MSE':
