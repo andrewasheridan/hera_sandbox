@@ -59,7 +59,7 @@ class CNN_BC_Trainer(NN_Trainer):
             else:
                 saver.restore(session, self.pretrained_model_path)
 
-             archive_loc = self.log_dir + self.network.name
+            archive_loc = self.log_dir + self.network.name
             training_writer = tf.summary.FileWriter(archive_loc + '/training', session.graph)
             testing_writer = tf.summary.FileWriter(archive_loc + '/testing', session.graph)
             self.model_save_location = archive_loc + '/trained_model.ckpt'   
