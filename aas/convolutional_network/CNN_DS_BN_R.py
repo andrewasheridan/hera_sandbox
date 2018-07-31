@@ -30,6 +30,7 @@ class CNN_DS_BN_R(Restoreable_Component):
     def __init__(self,
                  name,
                  num_downsamples,
+                 cost = 'MSE',
                  log_dir = 'logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
@@ -45,6 +46,7 @@ class CNN_DS_BN_R(Restoreable_Component):
         self.adam_initial_learning_rate = adam_initial_learning_rate
         self.accuracy_threshold = accuracy_threshold
         self.gaussian_shift_scalar = gaussian_shift_scalar
+        self.cost = cost
         
 
         self._num_freq_channels = 1024
