@@ -1,17 +1,16 @@
-# Data_Creator_R
+# Data_Creator_BC
 
-import sys, os
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
 from data_manipulation import *
 from Data_Creator import Data_Creator
 
 import numpy as np
 
 class Data_Creator_BC(Data_Creator):
-    """Creates data in an alternate thread. R for regression.
+    """Creates data in an alternate thread. BC for binary classifier.
+       look at labels variable in _gen_data()
     
     ## usage:
-    ## data_maker = Data_Creator_R(num_flatnesses=250, mode = 'train')
+    ## data_maker = Data_Creator_BC(num_flatnesses=250, mode = 'train')
     ## data_maker.gen_data() #before loop
     ## inputs, targets = data_maker.get_data() #start of loop
     ## data_maker.gen_data() #immediately after get_data()
