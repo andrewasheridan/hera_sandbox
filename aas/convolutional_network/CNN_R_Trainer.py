@@ -33,7 +33,7 @@ class CNN_R_Trainer(NN_Trainer):
                             log_dir = log_dir,
                             model_save_interval = model_save_interval,
                             pretrained_model_path = pretrained_model_path,
-                            metric_names = metric_names
+                            metric_names = metric_names,
                             verbose = verbose)
         
 
