@@ -82,6 +82,8 @@ class CNN_DS_BN_C(Restoreable_Component):
                                                          dtype = self.dtype,
                                                          shape = shape,
                                                          initializer = tf.contrib.layers.xavier_initializer())
+
+
         for i in range(self.num_downsamples):
             self._msg += '.'; self._vprint(self._msg)
             
@@ -91,7 +93,7 @@ class CNN_DS_BN_C(Restoreable_Component):
                 
                 # filter shape:
                 fh = 1 # filter height = 1 for 1D convolution
-                fw = np.max([layer.get_shape().as_list()[2] / 4, 2])
+                fw = 3#np.max([layer.get_shape().as_list()[2] / 4, 2])
                 fic = 4**(i) # num in channels = number of incoming filters
                 foc = 4**(i+1) # num out channels = number of outgoing filters
                 filters = trainable([fh, fw, fic, foc], 'filters')
@@ -112,7 +114,7 @@ class CNN_DS_BN_C(Restoreable_Component):
                 
                 # downsample
                 with tf.variable_scope('downsample'):
-                    fw = fw*2
+                    fw = 5#fw*2
                     filters = trainable([fh, fw, foc, foc], 'filters')
 
                     sW = 2
