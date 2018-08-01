@@ -36,7 +36,6 @@ class Data_Creator_C(Data_Creator):
 
     def __init__(self,
                  num_flatnesses,
-                 num_classes = 161,
                  bl_data = None,
                  bl_dict = None,
                  gains = None,
@@ -58,7 +57,7 @@ class Data_Creator_C(Data_Creator):
                               bl_dict = bl_dict,
                               gains = gains,
                               abs_min_max_delay = abs_min_max_delay)
-        self.num_classes = num_classes
+        
         
              
     def _gen_data(self):
@@ -118,8 +117,8 @@ class Data_Creator_C(Data_Creator):
         # classes is supposed to have all the possible unique rounded values
         
         #0.00025 precision
-        rounded_targets = np.asarray([np.round(abs(np.round(d * 40,2)/40), 5) for d in targets[permutation_index]]).reshape(-1)
-        classes = np.arange(0,0.04025, 0.00025)
+        # rounded_targets = np.asarray([np.round(abs(np.round(d * 40,2)/40), 5) for d in targets[permutation_index]]).reshape(-1)
+        # classes = np.arange(0,0.04025, 0.00025)
         # 0.0005 precision
         # x = [np.round(abs(np.round(d * 20,2)/20), 5) for d in dels]
 
@@ -127,8 +126,8 @@ class Data_Creator_C(Data_Creator):
         # x = [np.round(abs(np.round(d * 10,2)/10), 5) for d in dels]
         
         # 0.005 precision - 9 blocks
-#         rounded_targets = np.asarray([np.round(abs(np.round(d * 2,2)/2), 5) for d in targets]).reshape(-1)
-        # classes = np.arange(0,0.045, 0.005)
+        rounded_targets = np.asarray([np.round(abs(np.round(d * 2,2)/2), 5) for d in targets[permutation_index]]).reshape(-1)
+        classes = np.arange(0,0.045, 0.005)
     
         # for 0.00025 precision there should be 161 different classes
 
@@ -142,4 +141,5 @@ class Data_Creator_C(Data_Creator):
         labels = [classes_labels[x] for x in rounded_targets]
 
         self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels))
+
 
