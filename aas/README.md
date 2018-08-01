@@ -8,11 +8,13 @@ The majority of the work here is trying to find cable delays using ML.
 
 ## Prereqs
 
-```tensorflow
-	pyuvdata
-	hera_cal``` 
+```
+tensorflow
+pyuvdata
+hera_cal
+``` 
 
-	- and all their prereqs
+- and all their prereqs
 
 ## Data
 
