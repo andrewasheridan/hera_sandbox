@@ -172,10 +172,14 @@ class CNN_DS_BN_C(Restoreable_Component):
             
         with tf.variable_scope('logging'):
             self._msg += '.'; self._vprint(self._msg)
+            with tf.variable_scope('image'):
+                
+                self.image_buf = tf.placeholder(tf.string, shape=[])
+                epoch_image = tf.expand_dims(tf.image.decode_png(self.image_buf, channels=4), 0)
             
             tf.summary.scalar(name = 'cost', tensor = self.cost)
             tf.summary.scalar(name = 'accuracy', tensor = self.accuracy)
-
+            tf.summary.image('confusion_matrix', epoch_image)
             self.summary = tf.summary.merge_all()
             
         self._msg += ' done'

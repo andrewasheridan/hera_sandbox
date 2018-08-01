@@ -8,6 +8,12 @@ import tensorflow as tf
 from tensorflow.python.client import timeline
 
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import io
+import itertools
+
+np.seterr(divide='ignore', invalid='ignore') # for cm div/zero (handled)
 
 class CNN_C_Trainer(NN_Trainer):
 
@@ -135,7 +141,7 @@ class CNN_C_Trainer(NN_Trainer):
                                      self._network.downsample_keep_prob : self.downsample_keep_prob,
                                      self._network.is_training : True}
 
-                        session.run([self._network.optimizer], feed_dict = feed_dict) 
+                        session.run([self._network.optimizer], feed_dict = feed_dict)
                             
                     train_feed_dict = {self._network.X: training_inputs.reshape(-1,1,1024,1),
                                        self._network.labels: training_labels.reshape(-1,self.num_classes),
@@ -143,6 +149,9 @@ class CNN_C_Trainer(NN_Trainer):
                                        self._network.downsample_keep_prob : 1.,
                                        self._network.is_training : False}
 
+                    train_predicts =  session.run([self._network.predictions], train_feed_dict)
+
+                    train_feed_dict[self._network.image_buf] = self.plt_confusion_matrix(training_labels.reshape(-1,self.num_classes), train_predicts)
 
                     training_cost, training_acc, training_summary = session.run([self._network.cost,
                                                                                  self._network.accuracy,
@@ -157,7 +166,11 @@ class CNN_C_Trainer(NN_Trainer):
                                       self._network.labels: testing_labels.reshape(-1,self.num_classes),
                                       self._network.sample_keep_prob : 1.,
                                       self._network.downsample_keep_prob : 1.,
-                                      self._network.is_training : False} 
+                                      self._network.is_training : False}
+
+                    test_predicts =  session.run([self._network.predictions], test_feed_dict)
+
+                    test_feed_dict[self._network.image_buf] = self.plt_confusion_matrix(testing_labels.reshape(-1,self.num_classes), test_predicts) 
 
                     testing_cost, testing_acc, testing_summary = session.run([self._network.cost,
                                                                               self._network.accuracy,
@@ -190,3 +203,74 @@ class CNN_C_Trainer(NN_Trainer):
 
         self._metrics = [costs, accuracies]
         self.save_metrics()
+        
+    def plt_confusion_matrix(self, labels, pred, normalize=False, title='Confusion matrix'):
+        """
+        Given one-hot encoded labels and preds, displays a confusion matrix.
+        Arguments:
+            `labels`:
+                The ground truth one-hot encoded labels.
+            `pred`:
+                The one-hot encoded labels predicted by a model.
+            `normalize`:
+                If True, divides every column of the confusion matrix
+                by its sum. This is helpful when, for instance, there are 1000
+                'A' labels and 5 'B' labels. Normalizing this set would
+                make the color coding more meaningful and informative.
+        """
+        labels = [label.argmax() for label in np.asarray(labels).reshape(-1,self.num_classes)] # bc
+        pred = [label.argmax() for label in np.asarray(pred).reshape(-1,self.num_classes)] #bc
+
+        #classes = ['pos','neg']#np.arange(len(set(labels)))
+        if self.num_classes == 9:
+            precision = 0.005
+        if self.num_classes == 41:
+            precision = 0.001
+        if self.num_classes == 81:
+            precision = 0.0005
+        if self.num_classes == 161:
+            precision = 0.00025
+        classes = np.round(np.arange(0,0.04 + precision, precision), 5)
+        # eye = np.eye(len(classes), dtype = int)
+        # classes_labels = []
+        # for i, key in enumerate(classes):
+        #     classes_labels.append(eye[i].tolist())
+
+        cm = confusion_matrix(labels, pred, np.arange(len(classes)))
+
+        #if normalize:
+        cm = cm.astype('float')*100 / cm.sum(axis=1)[:, np.newaxis]
+        cm = np.nan_to_num(cm, copy=True)
+        cm = cm.astype('int')
+            #print("Normalized confusion matrix")
+        #else:
+            #print('Confusion matrix, without normalization')
+
+        fig, ax = plt.subplots(figsize = (6,6), dpi = 320)
+        #plt.figure(figsize=(15,10))
+        im = ax.imshow(cm, interpolation='nearest', aspect='auto', cmap=plt.cm.Oranges, vmin = 0, vmax = 100)
+        ax.set_title(title)
+        cbar = fig.colorbar(im)
+        tick_marks = np.arange(len(classes))
+        ax.set_xticks(tick_marks)
+        fs = 4 if self.num_classes <= 41 else 3
+        ax.set_xticklabels(classes, fontsize=fs, rotation=-90,  ha='center')
+        ax.set_yticks(tick_marks)
+        ax.set_yticklabels(classes, fontsize=fs)
+
+        ax.set_ylabel('True label')
+        ax.set_xlabel('Predicted label')
+        if self.num_classes <= 41:
+            for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+                #s = '{:2.0}'.format(cm[i, j]) if cm[i,j] >= 1 else '.'
+                ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=5, verticalalignment='center', color= "black")
+        ax.xaxis.set_tick_params(width=0.5)
+        ax.yaxis.set_tick_params(width=0.5)
+        fig.set_tight_layout(True)
+        # plt.show()
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', dpi = 320)
+        plt.close(fig)
+        buf.seek(0)
+
+        return buf.getvalue()
