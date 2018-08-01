@@ -8,6 +8,10 @@ import tensorflow as tf
 from tensorflow.python.client import timeline
 
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import io
+import itertools
 
 class CNN_BC_Trainer(NN_Trainer):
 
@@ -109,6 +113,9 @@ class CNN_BC_Trainer(NN_Trainer):
                                        self._network.downsample_keep_prob : 1.,
                                        self._network.is_training : False}
 
+                    train_predicts =  session.run([self._network.predictions], train_feed_dict)
+
+                    train_feed_dict[self._network.image_buf] = self.plt_confusion_matrix(training_labels.reshape(-1,2), train_predicts)
 
                     training_cost, training_acc, training_summary = session.run([self._network.cost,
                                                                                  self._network.accuracy,
@@ -118,12 +125,17 @@ class CNN_BC_Trainer(NN_Trainer):
                     training_writer.add_summary(training_summary, epoch)
                     training_writer.flush()  
                 
-                    
+
                     test_feed_dict = {self._network.X: testing_inputs.reshape(-1,1,1024,1),
                                       self._network.labels: testing_labels.reshape(-1,2),
                                       self._network.sample_keep_prob : 1.,
                                       self._network.downsample_keep_prob : 1.,
                                       self._network.is_training : False} 
+                                      
+                    test_predicts =  session.run([self._network.predictions], test_feed_dict)
+
+                    test_feed_dict[self._network.image_buf] = self.plt_confusion_matrix(testing_labels.reshape(-1,2), test_predicts) 
+
 
                     testing_cost, testing_acc, testing_summary = session.run([self._network.cost,
                                                                               self._network.accuracy,
@@ -156,3 +168,59 @@ class CNN_BC_Trainer(NN_Trainer):
 
         self._metrics = [costs, accuracies]
         self.save_metrics()
+
+
+
+    def plt_confusion_matrix(self, labels, pred, normalize=False, title='Confusion matrix'):
+        """
+        Given one-hot encoded labels and preds, displays a confusion matrix.
+        Arguments:
+            `labels`:
+                The ground truth one-hot encoded labels.
+            `pred`:
+                The one-hot encoded labels predicted by a model.
+            `normalize`:
+                If True, divides every column of the confusion matrix
+                by its sum. This is helpful when, for instance, there are 1000
+                'A' labels and 5 'B' labels. Normalizing this set would
+                make the color coding more meaningful and informative.
+        """
+        labels = [label.argmax() for label in np.asarray(labels).reshape(-1,2)] # bc
+        pred = [label.argmax() for label in np.asarray(pred).reshape(-1,2)] #bc
+
+        classes = ['pos','neg']#np.arange(len(set(labels)))
+
+        cm = confusion_matrix(labels, pred)
+
+        #if normalize:
+        cm = cm.astype('float')*100 / cm.sum(axis=1)[:, np.newaxis]
+        cm = np.nan_to_num(cm, copy=True)
+        cm = cm.astype('int')
+            #print("Normalized confusion matrix")
+        #else:
+            #print('Confusion matrix, without normalization')
+
+        fig, ax = plt.subplots(figsize = (5,5), dpi = 144)
+        #plt.figure(figsize=(15,10))
+        im = ax.imshow(cm, interpolation='nearest', aspect='auto', cmap=plt.cm.Oranges, vmin = 0, vmax = 100)
+        ax.set_title(title)
+        cbar = fig.colorbar(im)
+        tick_marks = np.arange(len(classes))
+        ax.set_xticks(tick_marks)
+        ax.set_xticklabels(classes)
+        ax.set_yticks(tick_marks)
+        ax.set_yticklabels(classes)
+
+        ax.set_ylabel('True label')
+        ax.set_xlabel('Predicted label')
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            #s = '{:2.0}'.format(cm[i, j]) if cm[i,j] >= 1 else '.'
+            ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=15, verticalalignment='center', color= "black")
+
+        # plt.show()
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', dpi = 144)
+        plt.close(fig)
+        buf.seek(0)
+
+        return buf.getvalue()
