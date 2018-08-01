@@ -142,7 +142,7 @@ class Data_Creator_C(Data_Creator):
         eye = np.eye(len(classes), dtype = int)
         classes_labels = {}
         for i, key in enumerate(classes):
-            classes_labels[np.round(key,4)] = eye[i].tolist()
+            classes_labels[np.round(key,5)] = eye[i].tolist()
             
             
         labels = [classes_labels[x] for x in rounded_targets]
