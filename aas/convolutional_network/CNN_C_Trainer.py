@@ -41,6 +41,39 @@ class CNN_C_Trainer(NN_Trainer):
         self.downsample_keep_prob = downsample_keep_prob
         self.num_classes = num_classes
 
+    def add_data(self,train_info, test_info, gains, num_flatnesses = 10, abs_min_max_delay = 0.040, precision = 0.00025):
+        """Adds data to the Trainer.
+
+            Args
+
+                train_info - (tuple : (visibility data, baselines dict)) - The training data
+                test_info - (tuple : (visibility data, baselines dict)) - The testing data
+                gains - (dict) - The gains for the visibilites
+                num_flatnesses - (int) - Number of flatnesses for each epoch
+                    - Number of samples is num_flatnesses * 60
+                abs_min_max_delay - (float) - The absolute value of the min or max delay for this dataset.
+
+        """
+        
+        self._abs_min_max_delay = abs_min_max_delay
+
+        self._train_batcher = self._Data_Creator(num_flatnesses,
+                                                 train_info[0],
+                                                 train_info[1],
+                                                 gains,
+                                                 abs_min_max_delay,
+                                                 precision)
+        self._train_batcher.gen_data()
+
+
+        self._test_batcher = self._Data_Creator(num_flatnesses,
+                                                test_info[0],
+                                                test_info[1],
+                                                gains,
+                                                abs_min_max_delay,
+                                                precision)
+        self._test_batcher.gen_data()
+
     def train(self):
         
         self.save_params()
@@ -73,7 +106,6 @@ class CNN_C_Trainer(NN_Trainer):
                 for epoch in range(self.num_epochs):
                     
                     
-
                     training_inputs, training_labels = self._train_batcher.get_data(); self._train_batcher.gen_data()
                     testing_inputs, testing_labels = self._test_batcher.get_data(); self._test_batcher.gen_data()  
 

@@ -39,7 +39,8 @@ class Data_Creator_C(Data_Creator):
                  bl_data = None,
                  bl_dict = None,
                  gains = None,
-                 abs_min_max_delay = 0.040):
+                 abs_min_max_delay = 0.040,
+                 precision = 0.00025):
         
         """
         Arguments
@@ -57,7 +58,9 @@ class Data_Creator_C(Data_Creator):
                               bl_dict = bl_dict,
                               gains = gains,
                               abs_min_max_delay = abs_min_max_delay)
-        
+
+        self.precision = precision
+
         
              
     def _gen_data(self):
@@ -116,27 +119,31 @@ class Data_Creator_C(Data_Creator):
         # pretty sure i have it working for the values below
         # classes is supposed to have all the possible unique rounded values
         
-        #0.00025 precision
-        # rounded_targets = np.asarray([np.round(abs(np.round(d * 40,2)/40), 5) for d in targets[permutation_index]]).reshape(-1)
-        # classes = np.arange(0,0.04025, 0.00025)
-        # 0.0005 precision
-        # x = [np.round(abs(np.round(d * 20,2)/20), 5) for d in dels]
+        #0.00025 precision - 161 classes
+        if self.precision == 0.00025:
+            rounded_targets = np.asarray([np.round(abs(np.round(d * 40,2)/40), 5) for d in targets[permutation_index]]).reshape(-1)
+            classes = np.arange(0,0.04 + self.precision, self.precision)
 
-        # 0.001 precision
-        # x = [np.round(abs(np.round(d * 10,2)/10), 5) for d in dels]
-        
-        # 0.005 precision - 9 blocks
-        rounded_targets = np.asarray([np.round(abs(np.round(d * 2,2)/2), 5) for d in targets[permutation_index]]).reshape(-1)
-        classes = np.arange(0,0.045, 0.005)
-    
-        # for 0.00025 precision there should be 161 different classes
+        # 0.0005 precision 81 classes
+        if self.precision == 0.0005:
+            rounded_targets = np.asarray([np.round(abs(np.round(d * 20,2)/20), 5) for d in targets[permutation_index]]).reshape(-1)
+            classes = np.arange(0,0.04 + self.precision, self.precision)
+
+        # 0.001 precision - 41 classes
+        if self.precision == 0.001:
+            rounded_targets = np.asarray([np.round(abs(np.round(d * 10,2)/10), 5) for d in targets[permutation_index]]).reshape(-1)
+            classes = np.arange(0,0.04 + self.precision, self.precision)
+
+        # for 0.005 precision there should be 9 different classes
+        if self.precision == 0.005:
+            rounded_targets = np.asarray([np.round(abs(np.round(d * 2,2)/2), 5) for d in targets[permutation_index]]).reshape(-1)
+            classes = np.arange(0,0.04 + self.precision, self.precision)
 
         eye = np.eye(len(classes), dtype = int)
         classes_labels = {}
         for i, key in enumerate(classes):
-            classes_labels[np.round(key,5)] = eye[i].tolist()
+            classes_labels[np.round(key,4)] = eye[i].tolist()
             
-#         print(classes_labels)
             
         labels = [classes_labels[x] for x in rounded_targets]
 
