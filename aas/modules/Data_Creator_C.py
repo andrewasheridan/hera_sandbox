@@ -119,6 +119,11 @@ class Data_Creator_C(Data_Creator):
         # pretty sure i have it working for the values below
         # classes is supposed to have all the possible unique rounded values
         
+        #0.0001 precision - 401 classes
+        if self.precision == 0.0001:
+            rounded_targets = np.asarray([np.round(abs(np.round(d * 40,2)/40), 4) for d in targets[permutation_index]]).reshape(-1)
+            classes = np.arange(0,0.04 + self.precision, self.precision)
+        
         #0.00025 precision - 161 classes
         if self.precision == 0.00025:
             rounded_targets = np.asarray([np.round(abs(np.round(d * 40,2)/40), 5) for d in targets[permutation_index]]).reshape(-1)
