@@ -93,7 +93,7 @@ class CNN_DS_BN_C(Restoreable_Component):
                 
                 # filter shape:
                 fh = 1 # filter height = 1 for 1D convolution
-                fw = 3#np.max([layer.get_shape().as_list()[2] / 4, 2])
+                fw = 3#1 + np.max([layer.get_shape().as_list()[2] / 32, 2])
                 fic = 4**(i) # num in channels = number of incoming filters
                 foc = 4**(i+1) # num out channels = number of outgoing filters
                 filters = trainable([fh, fw, fic, foc], 'filters')
@@ -110,11 +110,12 @@ class CNN_DS_BN_C(Restoreable_Component):
                 biases = trainable([foc], 'biases')
                 layer = tf.nn.bias_add(layer, biases)
                 layer = tf.nn.leaky_relu(layer)
+                #layer = tf.nn.dropout(layer, self.downsample_keep_prob)
                 layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
                 
                 # downsample
                 with tf.variable_scope('downsample'):
-                    fw = 5#fw*2
+                    fw = 5#1 + fw*2
                     filters = trainable([fh, fw, foc, foc], 'filters')
 
                     sW = 2
