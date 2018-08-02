@@ -111,7 +111,6 @@ class CNN_C_Trainer(NN_Trainer):
             try:
                 for epoch in range(self.num_epochs):
                     
-                    
                     training_inputs, training_labels = self._train_batcher.get_data(); self._train_batcher.gen_data()
                     testing_inputs, testing_labels = self._test_batcher.get_data(); self._test_batcher.gen_data()  
 
@@ -230,6 +229,8 @@ class CNN_C_Trainer(NN_Trainer):
             precision = 0.0005
         if self.num_classes == 161:
             precision = 0.00025
+        if self.num_classes == 401:
+            precision = 0.0001
         classes = np.round(np.arange(0,0.04 + precision, precision), 5)
         # eye = np.eye(len(classes), dtype = int)
         # classes_labels = []
@@ -246,26 +247,32 @@ class CNN_C_Trainer(NN_Trainer):
         #else:
             #print('Confusion matrix, without normalization')
 
-        fig, ax = plt.subplots(figsize = (6,6), dpi = 320)
+        fig, ax = plt.subplots(figsize = (5,5), dpi = 320)
         #plt.figure(figsize=(15,10))
         im = ax.imshow(cm, interpolation='nearest', aspect='auto', cmap=plt.cm.Oranges, vmin = 0, vmax = 100)
         ax.set_title(title)
         cbar = fig.colorbar(im)
-        tick_marks = np.arange(len(classes))
-        ax.set_xticks(tick_marks)
-        fs = 4 if self.num_classes <= 41 else 3
-        ax.set_xticklabels(classes, fontsize=fs, rotation=-90,  ha='center')
-        ax.set_yticks(tick_marks)
-        ax.set_yticklabels(classes, fontsize=fs)
+        if len(classes) <= 161:
+            tick_marks = np.arange(len(classes))
 
+            fs = 4 if self.num_classes <= 41 else 3
+            ax.set_xticks(tick_marks)
+            ax.set_xticklabels(classes, fontsize=fs, rotation=-90,  ha='center')
+            ax.set_yticks(tick_marks)
+            ax.set_yticklabels(classes, fontsize=fs)
+            ax.xaxis.set_tick_params(width=0.5)
+            ax.yaxis.set_tick_params(width=0.5)
+        else:
+            ax.set_xticks([])
+            ax.set_yticks([])
+        
         ax.set_ylabel('True label')
         ax.set_xlabel('Predicted label')
         if self.num_classes <= 41:
             for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
                 #s = '{:2.0}'.format(cm[i, j]) if cm[i,j] >= 1 else '.'
                 ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=5, verticalalignment='center', color= "black")
-        ax.xaxis.set_tick_params(width=0.5)
-        ax.yaxis.set_tick_params(width=0.5)
+
         fig.set_tight_layout(True)
         # plt.show()
         buf = io.BytesIO()
