@@ -40,7 +40,8 @@ class Data_Creator_C(Data_Creator):
                  bl_dict = None,
                  gains = None,
                  abs_min_max_delay = 0.040,
-                 precision = 0.00025):
+                 precision = 0.00025,
+                 evaluation = False):
         
         """
         Arguments
@@ -60,7 +61,7 @@ class Data_Creator_C(Data_Creator):
                               abs_min_max_delay = abs_min_max_delay)
 
         self.precision = precision
-
+        self.evaluation = evaluation
         
              
     def _gen_data(self):
@@ -100,12 +101,17 @@ class Data_Creator_C(Data_Creator):
                    self._bl_data_c[seps[1]] * self._gains[(c,'x')]   * self._gains_c[(d,'x')]
 
         inputs = []
+        seps = []
+
+
         for _ in range(self._num):
 
             unique_baseline = random.sample(self._bl_dict.keys(), 1)[0]
             two_seps = [random.sample(self._bl_dict[unique_baseline], 2)][0]
 
             inputs.append(_flatness(two_seps))
+            for t in range(60):
+                seps.append(two_seps)
 
         inputs = np.angle(np.array(inputs).reshape(-1,1024) * applied_delay)
         
@@ -114,8 +120,8 @@ class Data_Creator_C(Data_Creator):
         
 #         TODO: Quadruple check that rounded_targets is doing what you think it is doing
 
-        # rounded_targets is supposed to take the true targets and round there value
-        # to the value closest to the desired precision.
+        # rounded_targets is supposed to take the true targets and round their value
+        # to the value closest to the desired precision. and the absolute.
         # pretty sure i have it working for the values below
         # classes is supposed to have all the possible unique rounded values
         
@@ -152,6 +158,9 @@ class Data_Creator_C(Data_Creator):
             
         labels = [classes_labels[x] for x in rounded_targets]
 
-        self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels))
-
+        if self.evaluation == True:
+            self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels, targets[permutation_index], np.asarray(seps)[permutation_index]))
+        else:
+            self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels))
+        
 
