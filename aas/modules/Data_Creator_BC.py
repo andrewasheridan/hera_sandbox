@@ -85,6 +85,7 @@ class Data_Creator_BC(Data_Creator):
             two_seps = [random.sample(self._bl_dict[unique_baseline], 2)][0]
 
             inputs.append(_flatness(two_seps))
+            
 
         inputs = np.angle(np.array(inputs).reshape(-1,1024) * applied_delay)
         
