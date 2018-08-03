@@ -12,6 +12,10 @@ The majority of the work here is trying to find cable delays using ML.
 tensorflow
 pyuvdata
 hera_cal
+
+# for blue percepturally uniform colormap
+# see https://github.com/bokeh/colorcet
+colorcet (conda install -c bokeh colorcet)
 ``` 
 
 - and all their prereqs
