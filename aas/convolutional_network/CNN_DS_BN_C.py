@@ -169,7 +169,11 @@ class CNN_DS_BN_C(Restoreable_Component):
             with tf.variable_scope('train'):
                 
                 self._msg += '.'; self._vprint(self._msg)
-                self.optimizer = tf.train.AdamOptimizer(self.adam_initial_learning_rate, epsilon=1e-8).minimize(self.cost)
+                if self.dtype == tf.float16:
+                    epsilon=1e-4 # optimizer outputs NaN otherwise :(
+                else:
+                    epsilon=1e-8
+                self.optimizer = tf.train.AdamOptimizer(self.adam_initial_learning_rate, epsilon=epsilon).minimize(self.cost)
             
         with tf.variable_scope('logging'):
             self._msg += '.'; self._vprint(self._msg)
