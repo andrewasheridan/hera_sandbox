@@ -4,6 +4,7 @@ import hera_cal as hc
 import random
 from threading import Thread
 from glob import glob
+import os
 
 def load_relevant_data(miriad_path, calfits_path):
     """Loads redundant baselines, gains, and data.
@@ -208,11 +209,22 @@ def get_or_gen_test_train_red_bls_dicts(red_bls = None,
                                         training_load_path = None,
                                         testing_load_path = None):
 
+    training_fn = '../data/training_redundant_baselines_dict_{}'.format(int(100*training_percent))
+    testing_fn = '../data/testing_redundant_baselines_dict_{}'.format(int(100*training_percent))
+
     if training_load_path != None and testing_load_path != None:
         
         training_red_bls_dict = _loadnpz(training_load_path)[()]
         testing_red_bls_dict = _loadnpz(testing_load_path)[()]
+
     else:
+
+        # if the files exist dont remake them.
+        if os.path.exists(training_fn + '.npz') and os.path.exists(testing_fn + '.npz'):
+            training_red_bls_dict = _loadnpz(training_load_path)[()]
+            testing_red_bls_dict = _loadnpz(testing_load_path)[()]
+
+        else:
         
         assert type(red_bls) != None, "Provide a list of redundant baselines"
         assert type(gain_keys) != None, "Provide a list of gain keys"
@@ -221,8 +233,8 @@ def get_or_gen_test_train_red_bls_dicts(red_bls = None,
         training_red_bls_dict, testing_red_bls_dict = _train_test_split_red_bls(good_red_bls,
                                                                                 training_percent = training_percent)
 
-        np.savez('../data/training_redundant_baselines_dict_{}'.format(int(100*training_percent)), training_red_bls_dict)
-        np.savez('../data/testing_redundant_baselines_dict_{}'.format(int(100*training_percent)), testing_red_bls_dict)
+        np.savez(training_fn, training_red_bls_dict)
+        np.savez(testing_fn, testing_red_bls_dict)
 
     return training_red_bls_dict, testing_red_bls_dict
 
