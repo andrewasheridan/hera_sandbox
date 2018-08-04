@@ -1,5 +1,5 @@
-# convolutional_network
+# experiments
 
  - see `_Convolutional_Networks.ipynb`
 
- - TODO : Add example for classifer with tensorboard output confusion matrix
+ - TODO : Write this document. And other things
