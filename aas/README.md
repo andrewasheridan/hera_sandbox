@@ -31,20 +31,24 @@ Data is built with NRAO IDR-2 miriad / firstcal files (is this description corre
 TODO: Add description of how data is manipulated. For now see `modules/data_manipulation.py`
 
 ## Directory Contents
-`zen_data/` - data - not in repo
 
-`wrap_unwrap/` - quick overview
+`data/` - generated data - not in repo
 
-`modules/` - data manipulation & creators, base classes. 
+`data_creation/` - how the data is generated from raw data
 
-`solver/` - solver for Ax = y using the networks output (non functional)
+`experiments/` - Experiments in training different networks, solving Ax = b, and doing other things.
 
-`fully_connected_network/` - one type of deep fully connected network
+`modules/` - base classes, helpers. 
 
-`convolutional_network/` - multiple convolutional networks of various configurations. Current focus
+`network_trainers/` - classes for training different network types
 
-TODO: clean up directory structure ?
+`networks/` - various different network types
+
+`zen_data/` - raw data - not in repo
+
+`wrap_unwrap/` - quick overview of the wrap unwrap problem
+
 
 ## Current Focus
- - mostly working in `convolutional_network/` on `CNN_DS_BN_C.py` & `CNN_C.ipynb`
-  - see `convolutional_network/_Convolutional_Networks.ipynb` for a description
+ - mostly working in `experiments/` on `CNN_DS_BN_C.py` & `CNN_C.ipynb`
+  - see `experiments/_Convolutional_Networks.ipynb` for a description
