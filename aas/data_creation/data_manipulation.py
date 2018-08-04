@@ -204,12 +204,14 @@ def _loadnpz(filename):
 
 def get_or_gen_test_train_red_bls_dicts(red_bls = None,
                                         gain_keys = None,
-                                        training_percent = 0.80):
+                                        training_percent = 0.80,
+                                        training_load_path = None,
+                                        testing_load_path = None):
 
-    if len(glob("*.npz")) == 2:
+    if training_load_path != None and testing_load_path != None:
         
-        training_red_bls_dict = _loadnpz('training_redundant_baselines_dict.npz')[()]
-        testing_red_bls_dict = _loadnpz('testing_redundant_baselines_dict.npz')[()]
+        training_red_bls_dict = _loadnpz(training_load_path)[()]
+        testing_red_bls_dict = _loadnpz(testing_load_path)[()]
     else:
         
         assert type(red_bls) != None, "Provide a list of redundant baselines"
@@ -219,8 +221,8 @@ def get_or_gen_test_train_red_bls_dicts(red_bls = None,
         training_red_bls_dict, testing_red_bls_dict = _train_test_split_red_bls(good_red_bls,
                                                                                 training_percent = training_percent)
 
-        np.savez('training_redundant_baselines_dict', training_red_bls_dict)
-        np.savez('testing_redundant_baselines_dict', testing_red_bls_dict)
+        np.savez('../data/training_redundant_baselines_dict_{}'.format(int(100*training_percent)), training_red_bls_dict)
+        np.savez('../data/testing_redundant_baselines_dict_{}'.format(int(100*training_percent)), testing_red_bls_dict)
 
     return training_red_bls_dict, testing_red_bls_dict
 
