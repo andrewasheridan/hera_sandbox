@@ -221,20 +221,20 @@ def get_or_gen_test_train_red_bls_dicts(red_bls = None,
 
         # if the files exist dont remake them.
         if os.path.exists(training_fn + '.npz') and os.path.exists(testing_fn + '.npz'):
-            training_red_bls_dict = _loadnpz(training_load_path)[()]
-            testing_red_bls_dict = _loadnpz(testing_load_path)[()]
+            training_red_bls_dict = _loadnpz(training_fn + '.npz')[()]
+            testing_red_bls_dict = _loadnpz(testing_fn + '.npz')[()]
 
         else:
         
-        assert type(red_bls) != None, "Provide a list of redundant baselines"
-        assert type(gain_keys) != None, "Provide a list of gain keys"
-        
-        good_red_bls = get_good_red_bls(red_bls, gain_keys)
-        training_red_bls_dict, testing_red_bls_dict = _train_test_split_red_bls(good_red_bls,
-                                                                                training_percent = training_percent)
+            assert type(red_bls) != None, "Provide a list of redundant baselines"
+            assert type(gain_keys) != None, "Provide a list of gain keys"
+            
+            good_red_bls = get_good_red_bls(red_bls, gain_keys)
+            training_red_bls_dict, testing_red_bls_dict = _train_test_split_red_bls(good_red_bls,
+                                                                                    training_percent = training_percent)
 
-        np.savez(training_fn, training_red_bls_dict)
-        np.savez(testing_fn, testing_red_bls_dict)
+            np.savez(training_fn, training_red_bls_dict)
+            np.savez(testing_fn, testing_red_bls_dict)
 
     return training_red_bls_dict, testing_red_bls_dict
 
