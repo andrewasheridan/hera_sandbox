@@ -31,7 +31,7 @@ class CNN_DS_BN_R(Restoreable_Component):
                  name,
                  num_downsamples,
                  cost = 'MSE',
-                 log_dir = 'logs/',
+                 log_dir = '../logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
                  accuracy_threshold = 0.00625,

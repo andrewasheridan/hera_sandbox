@@ -31,7 +31,7 @@ class CNN_DS_BN_BC(Restoreable_Component):
     def __init__(self,
                  name,
                  num_downsamples,
-                 log_dir = 'logs/',
+                 log_dir = '../logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
                  verbose = True):

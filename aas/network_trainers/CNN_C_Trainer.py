@@ -24,7 +24,7 @@ class CNN_C_Trainer(NN_Trainer):
                  num_classes,
                  num_epochs = 100,
                  batch_size = 32,
-                 log_dir = 'logs/',
+                 log_dir = '../logs/',
                  model_save_interval = 25,
                  pretrained_model_path = None,
                  metric_names = ['costs', 'accuracies'],

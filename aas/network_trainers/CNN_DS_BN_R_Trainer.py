@@ -16,7 +16,7 @@ class CNN_DS_BN_R_Trainer(NN_Trainer):
                  Data_Creator, # Class
                  num_epochs = 100,
                  batch_size = 32,
-                 log_dir = 'logs/',
+                 log_dir = '../logs/',
                  model_save_interval = 25,
                  pretrained_model_path = None,
                  metric_names = ['MISGs', 'MSEs', 'MQEs', 'PWTs'],

@@ -20,7 +20,7 @@ class CNN_QP_BN_R(Restoreable_Component):
                  wide_convolution_filter_widths,
                  layer_downsampling_factors, 
                  num_1x1_conv_filters_per_layer,
-                 log_dir = 'logs/',
+                 log_dir = '../logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
                  cost = 'MSE',
