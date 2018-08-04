@@ -51,4 +51,4 @@ TODO: Add description of how data is manipulated. For now see `modules/data_mani
 
 ## Current Focus
  - mostly working in `experiments/` on `CNN_DS_BN_C.py` & `CNN_C.ipynb`
-  - see `experiments/_Convolutional_Networks.ipynb` for a description
+  - see `networks/Network_Info.ipynb` for a description
