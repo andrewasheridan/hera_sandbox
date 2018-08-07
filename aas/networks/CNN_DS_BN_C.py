@@ -68,7 +68,7 @@ class CNN_DS_BN_C(Restoreable_Component):
             self._msg += '.'; self._vprint(self._msg)
 
             self.sample_keep_prob = tf.placeholder(self.dtype, name = 'sample_keep_prob')
-            self.downsample_keep_prob = tf.placeholder(self.dtype, name = 'downsample_keep_prob')
+            self.conv_keep_prob = tf.placeholder(self.dtype, name = 'conv_keep_prob')
         
         
         with tf.variable_scope('sample'):
@@ -77,59 +77,32 @@ class CNN_DS_BN_C(Restoreable_Component):
             
             self.X = tf.placeholder(self.dtype, shape = [None, 1, self._num_freq_channels, 1], name = 'X')
             self.X = tf.nn.dropout(self.X, self.sample_keep_prob)
-            
-        trainable = lambda shape, name : tf.get_variable(name = name,
-                                                         dtype = self.dtype,
-                                                         shape = shape,
-                                                         initializer = tf.contrib.layers.xavier_initializer())
-
 
         for i in range(self.num_downsamples):
             self._msg += '.'; self._vprint(self._msg)
             
-            with tf.variable_scope('conv_layer_{}'.format(i)):
+            foc = 4**(i+1) # num filters grows with each downsample
+            
+            with tf.variable_scope('downsample_{}'.format(i)):
 
                 layer = self.X if i == 0 else self._layers[-1]
-                
-                # filter shape:
-                fh = 1 # filter height = 1 for 1D convolution
-                fw = 3#1 + np.max([layer.get_shape().as_list()[2] / 32, 2])
-                fic = 4**(i) # num in channels = number of incoming filters
-                foc = 4**(i+1) # num out channels = number of outgoing filters
-                filters = trainable([fh, fw, fic, foc], 'filters')
-                
-                # stride shape
-                sN = 1 # batch = 1 (why anything but 1 ?)
-                sH = 1 # height of stride = 1 for 1D conv
-                sW = 1 # width of stride = downsampling factor = 1 for no downsampling or > 1 for downsampling
-                sC = 1 # depth = number of channels the stride walks over = 1 (why anything but 1 ?)
-                strides_no_downsample = [sN, sH, sW, sC]
-                layer = tf.nn.conv2d(layer, filters, strides_no_downsample, 'SAME')
-                
-                # shape of biases = [num outgoing filters]
-                biases = trainable([foc], 'biases')
-                layer = tf.nn.bias_add(layer, biases)
-                layer = tf.nn.leaky_relu(layer)
-                #layer = tf.nn.dropout(layer, self.downsample_keep_prob)
-                layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
-                
-                # downsample
-                with tf.variable_scope('downsample'):
-                    fw = 5#1 + fw*2
-                    filters = trainable([fh, fw, foc, foc], 'filters')
-
-                    sW = 2
-                    strides_no_downsample = [sN, sH, sW, sC]
-                    layer = tf.nn.conv2d(layer, filters, strides_no_downsample, 'SAME')
-
-                    # shape of biases = [num outgoing filters]
-                    biases = trainable([foc], 'biases')
-                    layer = tf.nn.bias_add(layer, biases)
-                    layer = tf.nn.leaky_relu(layer)
-                    layer = tf.nn.dropout(layer, self.downsample_keep_prob)
-                    layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
-
-                self._layers.append(layer)
+                fitlter_widths = [3,5,7,9]
+                for fw in fitlter_widths:
+                    with tf.variable_scope('conv_1x{}'.format(fw)):
+                        
+                        layer = tf.layers.conv2d(inputs = layer,
+                                                 filters = foc, 
+                                                 kernel_size = (1,fw),
+                                                 strides = (1,1) if fw != fitlter_widths[-1] else (1,2), # downscale laster conv
+                                                 padding = 'SAME',
+                                                 activation = tf.nn.leaky_relu,
+                                                 use_bias = True,
+                                                 bias_initializer = tf.contrib.layers.xavier_initializer())
+                        
+                        layer = tf.nn.dropout(layer, self.conv_keep_prob)
+                        layer = tf.layers.batch_normalization(layer, training = self.is_training)
+                        
+            self._layers.append(layer)
                               
         
                 
@@ -187,6 +160,6 @@ class CNN_DS_BN_C(Restoreable_Component):
             tf.summary.image('confusion_matrix', epoch_image)
             self.summary = tf.summary.merge_all()
             
-        self._msg += ' done'
-        self._vprint(self._msg)
-        self._msg = ''
+        num_trainable_params = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
+        self._msg = '\rnetwork Ready - {} trainable parameters'.format(num_trainable_params); self._vprint(self._msg)
+
