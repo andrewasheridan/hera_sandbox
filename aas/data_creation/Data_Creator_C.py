@@ -41,7 +41,10 @@ class Data_Creator_C(Data_Creator):
                  gains = None,
                  abs_min_max_delay = 0.040,
                  precision = 0.00025,
-                 evaluation = False):
+                 evaluation = False,
+                 single_dataset = False,
+                 singleset_path = None,
+                 blur = 0): # try 1, 0.5, 0.10
         
         """
         Arguments
@@ -62,9 +65,33 @@ class Data_Creator_C(Data_Creator):
 
         self.precision = precision
         self.evaluation = evaluation
+        self.single_dataset = single_dataset
+        self.singleset_path = singleset_path
+        self.blur = blur
         
+    def _load_singleset(self):
+        """load a set of specific baseline-pairs"""
+        def loadnpz(filename):
+            a = np.load(filename)
+            d = dict(zip(("data1{}".format(k) for k in a), (a[k] for k in a)))
+            return d['data1arr_0']
+
+        return [[(s[0][0],s[0][1]), (s[1][0],s[1][1])] for s in loadnpz(self.singleset_path)]
+    
+    def _blur(self, labels):
+        """Convert a one-hot vector delta function to a gaussian.
+           Spreads the 1.0 prob of a class over a range of nearby classes.
+           blur = 0.5 spreads over about 7 classes with a peak prob of 0.5
+           blue = 0.1 spreads over about 40 classes with peak prob ~ 0.06"""
+        for i, label in enumerate(labels):
+            true_val = np.argmax(label)
+            mean = true_val; std = self.blur; variance = std**2
+            x = np.arange(len(label))
+            f = np.exp(-np.square(x-mean)/2*variance)
+            labels[i] = f/np.sum(f)
+        return labels
              
-    def _gen_data(self):
+    def _gen_data(self):            
         
         # scaling tools
         # the NN likes data in the range (0,1)
@@ -103,12 +130,15 @@ class Data_Creator_C(Data_Creator):
         inputs = []
         seps = []
 
+        singleset_seps = None if self.singleset_path == None else self._load_singleset()
 
-        for _ in range(self._num):
+        for i in range(self._num):
 
             unique_baseline = random.sample(self._bl_dict.keys(), 1)[0]
-            two_seps = [random.sample(self._bl_dict[unique_baseline], 2)][0]
-
+            if self.singleset_path == None:
+                two_seps = [random.sample(self._bl_dict[unique_baseline], 2)][0]
+            elif self.singleset_path != None:
+                two_seps = singleset_seps[i]
             inputs.append(_flatness(two_seps))
             for t in range(60):
                 seps.append(two_seps)
@@ -157,9 +187,12 @@ class Data_Creator_C(Data_Creator):
             
             
         labels = [classes_labels[x] for x in rounded_targets]
-
+        labels = labels if self.blur == 0 else self._blur(labels)
+        
         if self.evaluation == True:
             self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels, targets[permutation_index], np.asarray(seps)[permutation_index]))
+        if self.single_dataset == True:
+            self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels, np.asarray(seps)[permutation_index]))
         else:
             self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels))
         
