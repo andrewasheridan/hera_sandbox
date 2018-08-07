@@ -29,8 +29,9 @@ class CNN_C_Trainer(NN_Trainer):
                  pretrained_model_path = None,
                  metric_names = ['costs', 'accuracies'],
                  sample_keep_prob = 0.80,
-                 downsample_keep_prob = 0.9,
-                 verbose = True):
+                 conv_keep_prob = 0.9,
+                 verbose = True,
+                 single_dataset = False):
     
         NN_Trainer.__init__(self,
                             network = network,
@@ -45,10 +46,11 @@ class CNN_C_Trainer(NN_Trainer):
         
 
         self.sample_keep_prob = sample_keep_prob
-        self.downsample_keep_prob = downsample_keep_prob
+        self.conv_keep_prob = conv_keep_prob
         self.num_classes = num_classes
+        self.single_dataset = single_dataset
 
-    def add_data(self,train_info, test_info, gains, num_flatnesses = 10, abs_min_max_delay = 0.040, precision = 0.00025):
+    def add_data(self,train_info, test_info, gains, num_flatnesses = 10, abs_min_max_delay = 0.040, precision = 0.00025, blur = 0):
         """Adds data to the Trainer.
 
             Args
@@ -61,7 +63,6 @@ class CNN_C_Trainer(NN_Trainer):
                 abs_min_max_delay - (float) - The absolute value of the min or max delay for this dataset.
 
         """
-        
         self._abs_min_max_delay = abs_min_max_delay
 
         self._train_batcher = self._Data_Creator(num_flatnesses,
@@ -69,7 +70,9 @@ class CNN_C_Trainer(NN_Trainer):
                                                  train_info[1],
                                                  gains,
                                                  abs_min_max_delay,
-                                                 precision)
+                                                 precision,
+                                                 single_dataset = self.single_dataset,
+                                                 blur = blur)
         self._train_batcher.gen_data()
 
 
@@ -78,12 +81,16 @@ class CNN_C_Trainer(NN_Trainer):
                                                 test_info[1],
                                                 gains,
                                                 abs_min_max_delay,
-                                                precision)
+                                                precision,
+                                                single_dataset = self.single_dataset,
+                                                blur = blur)
         self._test_batcher.gen_data()
 
     def train(self):
         
         self.save_params()
+
+
 
         costs = []
         accuracies = []
@@ -104,7 +111,7 @@ class CNN_C_Trainer(NN_Trainer):
             archive_loc = self.log_dir + self._network.name
             training_writer = tf.summary.FileWriter(archive_loc + '/training', session.graph)
             testing_writer = tf.summary.FileWriter(archive_loc + '/testing', session.graph)
-            self.model_save_location = archive_loc + '/trained_model.ckpt'   
+            self.model_save_location = archive_loc + '/trained_model.ckpt'
             
             
             self._msg = '\rtraining';self._vprint(self._msg)
@@ -112,8 +119,15 @@ class CNN_C_Trainer(NN_Trainer):
             try:
                 for epoch in range(self.num_epochs):
                     
-                    training_inputs, training_labels = self._train_batcher.get_data(); self._train_batcher.gen_data()
-                    testing_inputs, testing_labels = self._test_batcher.get_data(); self._test_batcher.gen_data()  
+                    if self.single_dataset == True and epoch == 0:
+                        training_inputs, training_labels, training_bl_dict_singleset = self._train_batcher.get_data(); self._train_batcher.gen_data()
+                        testing_inputs, testing_labels, testing_bl_dict_singleset = self._test_batcher.get_data(); self._test_batcher.gen_data()
+                        np.savez(archive_loc + '/params/train_bl_dict_singleset', training_bl_dict_singleset)   
+                        np.savez(archive_loc + '/params/test_bl_dict_singleset', testing_bl_dict_singleset)
+                        
+                    if self.single_dataset == False:
+                        training_inputs, training_labels = self._train_batcher.get_data(); self._train_batcher.gen_data()
+                        testing_inputs, testing_labels = self._test_batcher.get_data(); self._test_batcher.gen_data() 
 
                     training_labels = np.asarray(training_labels)
                     testing_labels = np.asarray(testing_labels)
@@ -126,11 +140,7 @@ class CNN_C_Trainer(NN_Trainer):
                         self._msg = '\repoch'
                         self._msg += '- {:5.0f}/{:5.0f}'.format(epoch + 1,self.num_epochs)
                         self._msg += ' - batch: {:4.0f}/{:4.0f}'.format(j + 1, int(num_entries/batch_size))
-                        if epoch != 0:
-                            self._msg += ' - (Training, Testing) - '.format(epoch)
-                            self._msg += " costs: ({:0.4f}, {:0.4f})".format(training_cost, testing_cost)
-                            self._msg += " accss: ({:2.2f}, {:2.2f})".format(training_acc, testing_acc)
-                        self._vprint(self._msg); 
+
 
                         training_inputs_batch = training_inputs[j*batch_size:(j + 1)*batch_size].reshape(-1,1,1024,1)
                         training_labels_batch = training_labels[j*batch_size:(j + 1)*batch_size].reshape(-1,self.num_classes)
@@ -138,15 +148,20 @@ class CNN_C_Trainer(NN_Trainer):
                         feed_dict = {self._network.X: training_inputs_batch,
                                      self._network.labels: training_labels_batch,
                                      self._network.sample_keep_prob : self.sample_keep_prob,
-                                     self._network.downsample_keep_prob : self.downsample_keep_prob,
+                                     self._network.conv_keep_prob : self.conv_keep_prob,
                                      self._network.is_training : True}
 
-                        session.run([self._network.optimizer], feed_dict = feed_dict)
+                        batch_cost, batch_acc, _ = session.run([self._network.cost, self._network.accuracy, self._network.optimizer], feed_dict = feed_dict)
+                        if epoch != 0:
+                            self._msg += " batch cost: {:0.4f}".format(batch_cost)
+                            self._msg += " batch accs: {:2.2f}".format(batch_acc)
+                        self._vprint(self._msg); 
+                        
                             
                     train_feed_dict = {self._network.X: training_inputs.reshape(-1,1,1024,1),
                                        self._network.labels: training_labels.reshape(-1,self.num_classes),
                                        self._network.sample_keep_prob : 1.,
-                                       self._network.downsample_keep_prob : 1.,
+                                       self._network.conv_keep_prob : 1.,
                                        self._network.is_training : False}
 
                     train_predicts =  session.run([self._network.predictions], train_feed_dict)
@@ -165,7 +180,7 @@ class CNN_C_Trainer(NN_Trainer):
                     test_feed_dict = {self._network.X: testing_inputs.reshape(-1,1,1024,1),
                                       self._network.labels: testing_labels.reshape(-1,self.num_classes),
                                       self._network.sample_keep_prob : 1.,
-                                      self._network.downsample_keep_prob : 1.,
+                                      self._network.conv_keep_prob : 1.,
                                       self._network.is_training : False}
 
                     test_predicts =  session.run([self._network.predictions], test_feed_dict)
@@ -272,7 +287,8 @@ class CNN_C_Trainer(NN_Trainer):
         if self.num_classes <= 41:
             for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
                 #s = '{:2.0}'.format(cm[i, j]) if cm[i,j] >= 1 else '.'
-                ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=5, verticalalignment='center', color= "black")
+                ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.',
+                        horizontalalignment="center", fontsize=5, verticalalignment='center', color= "black")
 
         fig.set_tight_layout(True)
         # plt.show()
@@ -282,3 +298,4 @@ class CNN_C_Trainer(NN_Trainer):
         buf.seek(0)
 
         return buf.getvalue()
+
