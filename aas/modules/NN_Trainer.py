@@ -9,10 +9,10 @@ import numpy as np
 import os, io
 
 class NN_Trainer(Restoreable_Component):
-    """Skeleton for restoreable neural network trainer (does not include training method).
-        Should be able to add different train methods to this for different network styles.
+    """ Parent for restoreable neural network trainer (does not include training method).
+        Add train method particular to network.
 
-        Args
+        Args:
 
             network - (one of the network classes from this repo) - The network to train
             Data_Creator - (one of the Data_Creator_* classes from this repo) - Creates data..
@@ -25,6 +25,7 @@ class NN_Trainer(Restoreable_Component):
             metric_names - (list of strings) - Names of the various metrics for this trainer
             verbose - (bool) - Be verbose.
     """
+    __doc__ += Restoreable_Component.__doc__
     
     def __init__(self,
                  network,
@@ -45,7 +46,6 @@ class NN_Trainer(Restoreable_Component):
         self.batch_size = batch_size
         self.model_save_interval = model_save_interval 
         self.pretrained_model_path = pretrained_model_path
-        
         self._metrics = [] # list of lists
         self.metric_names = metric_names # list of strings, one per metric
 

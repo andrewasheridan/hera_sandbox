@@ -6,33 +6,49 @@ from Data_Creator import Data_Creator
 import numpy as np
 
 class Data_Creator_C(Data_Creator):
-    """Currently this groups data targets into the closest of 161 values. Each block has a label of its value.
-        Im not explaining this correctly...
+    """ Data_Creator_C - Child of Data_Creator
+        C = Classification
 
-        The point of this was to try to use a classifier to solve the problem instead of regression.
-         So I took the continuous targets and converted them into a series of discontinuous steps:
+        Creates one dimensional inputs and their labels for training
+        Inputs are simulated angle data generated with true data as their base
+            - see ????.ipynb for discussion of input data
+        Labels are one-hot vectors (optionally blurred vectors)
+            - see ????.ipynb for discussion of labels and blurring
 
-        # this should round the targets to the closest 0.00025 (2.5 ns)
-         rounded_targets = np.asarray([np.round(abs(np.round(d * 40,2)/40), 5) for d in targets[permutation_index]]).reshape(-1)
-          
-        # should be a list of all the possible rounded targets (the different class names)
-          classes = np.arange(0,0.04025, 0.00025)
+        Each input is generated:
+            - a pair of redundant baselines is randomly chosen
+            - the ratio of visibilties is constructed (a complex flatness, see discussion)
+            - a separate target cable delay is applied to each row of the flatness
+                - targets in the range (-abs_min_max_delay, abs_min_max_delay)
+            - the angle is computed of the flatness with the applied delay
 
-        # should make a dict of one hot vector for each class
-        eye = np.eye(len(classes), dtype = int)
-        classes_labels = {}
-        for i, key in enumerate(classes):
-            classes_labels[np.round(key,5)] = eye[i].tolist()
+        Each label is generated:
+            - the smooth range of targets is converted to a series of steps of the desired precision
+                - see Classifier_Class_Explanation.ipynb for discussion
+            - each unique step value is assigned a one-hot vector (from min to max)
+            - each target is assigned its label target
+            - if blur != 0 blur is applied
+                - Imagine each one-hot vector as a delta function with area = 1
+                - blur converts the delta function into a gaussian with area = 1
+                - see ????.ipynb for discussion
 
-        # should assign the appropriate one-hot vector for each target
-        labels = [classes_labels[x] for x in rounded_targets]
-
-        # and then the output of _gen_data is
-        self._epoch_batch.append((angle_tx(inputs[permutation_index]), labels))
-
-
-
+        Args:
+            num_flatnesses : int - number of flatnesses used to generate data.
+                                   Number of data samples = 60 * num_flatnesses
+            bl_data : data source. Output of get_seps_data()
+            bl_dict : dict - Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
+            gains : dict - Gains for this data. An output of load_relevant_data()
+            abs_min_max_delay : float - targets are generated in range(-abs_min_max_delay, abs_min_max_delay)
+            precision : float - size of the class steps must be from (0.005,0.001,0.0005,0.00025,0.0001)
+            evaluation - bool - changes return for network evaluation (experimental)
+            single_dataset - bool - 
+            singleset_path - string
+            blur - float - blur value. Convert a one-hot vector delta function to a gaussian.
+                Spreads the 1.0 prob of a class over a range of nearby classes.
+                blur = 0.5 spreads over about 7 classes with a peak prob of 0.5 (varies)
+                blue = 0.1 spreads over about 40 classes with peak prob ~ 0.06 (varies)
     """
+    __doc__ += Data_Creator.__doc__
 
     def __init__(self,
                  num_flatnesses,
@@ -45,17 +61,7 @@ class Data_Creator_C(Data_Creator):
                  single_dataset = False,
                  singleset_path = None,
                  blur = 0): # try 1, 0.5, 0.10
-        
-        """
-        Arguments
-            num_flatnesses : int - number of flatnesses used to generate data.
-                                   Number of data samples = 60 * num_flatnesses
-            bl_data : data source. Output of get_seps_data()
-            bl_dict : dict - Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
-            gains : dict - Gains for this data. An output of load_relevant_data()
-            
-                                   
-        """
+
         Data_Creator.__init__(self,
                               num_flatnesses = num_flatnesses,
                               bl_data = bl_data,

@@ -7,22 +7,32 @@ import os
 
 
 class Restoreable_Component(object):
-    """Allows saving and loading of parameters.
-       Excludes saving and loading of parameters begining with '_' or parameters that refer to tensorflow objects.
-       Retains the name of the initial object (will not load the name parameter from disk).
-       
-       Used for networks and network-trainers to ease recordkeeping."""
+    """Restoreable_Component
+
+        Allows saving / loading of object parameters.
+        Excludes saving / loading of parameters begining with '_' or parameters that refer to tensorflow objects.
+        Used for networks and network-trainers to ease recordkeeping.
+
+        Args:
+            name (string)       - Name of the object
+            log_dir (string)    - location to store object parameters
+            verbose (bool)      - Be verbose
+
+        Methods:
+            print_params()  - Print the parameters for the object
+            save_params()   - Saves parameters in log_dir/name/params/object_class.npz
+            load_params(path)   - Loads parameters from path into existing object
+                                - Retains the name of the existing object       
+       """
     
     def __init__(self, name, log_dir = 'logs/', verbose = True):
         self.name = name
         self.log_dir = log_dir
-        self._vprint = sys.stdout.write if verbose else lambda *a, **k: None
+        self._vprint = sys.stdout.write if verbose else lambda *a, **k: None # for verbose printing
         self._msg = ''
         
-        
-        
     def _gen_params_dict(self):
-        """Excludes saving and loading of parameters begininning with '_' or parameters that refer to tensorflow objects."""
+        """ Excludes saving and loading of parameters begininning with '_' or parameters that refer to tensorflow objects."""
         d = self.__dict__
         return {key : d[key] for key in d.keys() if key[0] != '_' if 'tensorflow' not in str(type(d[key]))}
     
@@ -31,7 +41,9 @@ class Restoreable_Component(object):
         pprint(self._gen_params_dict())
 
     def load_params(self, path):
-        """Load in parameters from npz file. Keeps the current name."""
+        """ Load in parameters from npz file.
+            Do not include the .npz suffix in path
+            Keeps the current object name."""
     
         self._msg = '\rloading parameters';self._vprint(self._msg)
         
@@ -47,7 +59,7 @@ class Restoreable_Component(object):
         self._msg = '\rparams loaded';self._vprint(self._msg)
         
     def save_params(self, direc = None):
-        """Save the parameters."""
+        """ Save the parameters. setting direc will override the default location."""
         
         self._msg += '\rsaving parameters';self._vprint(self._msg)
         

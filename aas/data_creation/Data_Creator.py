@@ -1,4 +1,4 @@
-# Data_Creator_R
+# Data_Creator
 
 import sys, os
 sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
@@ -7,8 +7,17 @@ from data_manipulation import *
 import numpy as np
 
 class Data_Creator(object):
-    """Superclass.Creates data in an alternate thread. R for regression.
-        Must override _gen_data()
+    """Data_Creator - Parent for network-style specific creators
+        Generates data, in an alternate thread, for training.
+        Child MUST override _gen_data()
+
+        Args:
+            num_flatnesses : int - number of flatnesses used to generate data.
+                                   Number of data samples = 60 * num_flatnesses
+            bl_data : data source. Output of get_seps_data()
+            bl_dict : dict - Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
+            gains : dict - Gains for this data. An output of load_relevant_data()
+
     ## usage:
     ## data_maker = Data_Creator_R(num_flatnesses=250, mode = 'train')
     ## data_maker.gen_data() #before loop
@@ -22,19 +31,7 @@ class Data_Creator(object):
                  bl_data = None,
                  bl_dict = None,
                  gains = None,
-                 abs_min_max_delay = 0.040):
-        
-        """
-        Arguments
-            num_flatnesses : int - number of flatnesses used to generate data.
-                                   Number of data samples = 60 * num_flatnesses
-            bl_data : data source. Output of get_seps_data()
-            bl_dict : dict - Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
-            gains : dict - Gains for this data. An output of load_relevant_data()
-            
-                                   
-        """
-        
+                 abs_min_max_delay = 0.040):     
         
         self._num = num_flatnesses
                     
