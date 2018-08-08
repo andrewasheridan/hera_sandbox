@@ -31,7 +31,7 @@ class CNN_DS_BN_C(Restoreable_Component):
                     - has batch normalization
                 - Filter widths (fw) of the four convolutions are [3,5,7,9]
                 TODO: Optional filter widths? (different per layer?)
-                - Fourth convolution will do 50% downsample
+                - Fourth convolution will do 50% downsample (horizontal stride = 2)
                 
             Final convolution feeds into fully connected layer as logits
             Cost function softmax_cross_entropy_with_logits_v2
@@ -134,7 +134,7 @@ class CNN_DS_BN_C(Restoreable_Component):
                         layer = tf.layers.conv2d(inputs = layer,
                                                  filters = foc, 
                                                  kernel_size = (1,fw),
-                                                 strides = (1,1) if fw != fitlter_widths[-1] else (1,2), # downscale laster conv
+                                                 strides = (1,1) if fw != fitlter_widths[-1] else (1,2), # downscale last conv
                                                  padding = 'SAME',
                                                  activation = tf.nn.leaky_relu,
                                                  use_bias = True,
@@ -172,7 +172,7 @@ class CNN_DS_BN_C(Restoreable_Component):
             self._cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels = self.labels, logits = self._logits)
             self.cost = tf.reduce_mean(self._cross_entropy)
         
-        # batch normalization requres the update_ops variable and control dependency
+        # batch normalization requires the update_ops variable and control dependency
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
             with tf.variable_scope('train'):
