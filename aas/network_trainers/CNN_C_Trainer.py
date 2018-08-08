@@ -260,21 +260,17 @@ class CNN_C_Trainer(NN_Trainer):
             precision = 0.00025
         if self.num_classes == 401:
             precision = 0.0001
-        classes = np.round(np.arange(0,0.04 + precision, precision), 5)
-        # eye = np.eye(len(classes), dtype = int)
-        # classes_labels = []
-        # for i, key in enumerate(classes):
-        #     classes_labels.append(eye[i].tolist())
-
-        cm = confusion_matrix(labels, pred, np.arange(len(classes)))
+        if self.num_classes == 2:
+            classes = ['pos','neg']
+            cm = confusion_matrix(labels, pred)
+        else:
+            classes = np.round(np.arange(0,0.04 + precision, precision), 5)
+            cm = confusion_matrix(labels, pred, np.arange(len(classes)))
 
         #if normalize:
         cm = cm.astype('float')*100 / cm.sum(axis=1)[:, np.newaxis]
         cm = np.nan_to_num(cm, copy=True)
         cm = cm.astype('int')
-            #print("Normalized confusion matrix")
-        #else:
-            #print('Confusion matrix, without normalization')
 
         fig, ax = plt.subplots(figsize = (5,5), dpi = 320)
         #plt.figure(figsize=(15,10))
