@@ -23,7 +23,7 @@ data = np.exp(-2j*np.pi*(nu*tau + phi))
 estimator = estdel.Cable_Delay(data)
 prediction = estimator.predict()
 
-# prediction gives list of scalar outputs
+# prediction should output tau
 """
 
 
@@ -97,7 +97,7 @@ class Delay_Sign(DelayPredict):
         return self.pred_signs
     
     def predict(self):
-    """ predict
+        """ predict
 
             Returns:
                 list of sign predictions
@@ -134,28 +134,27 @@ class Delay_Magnitude(DelayPredict):
 class Cable_Delay(object):
     """ Cable_Delay
 
-        Estimates cable delay by using two pretrained neural networks.
+    Estimates cable delay by using two pretrained neural networks.
 
-        Methods:
-            predict()
-                - call to make prediction
+    Methods:
+        predict()
+            - call to make prediction
     """
     
     def __init__(self, data, verbose=False):
-    """ Preprocesses data for prediction.
+        """ Preprocesses data for prediction.
 
             - converts complex data to angle
             - scales angles to range preferred by networks
             - reshapes 2D data to 4D tensor
-
-     """
+    
 
         Args:
 
             data : list, complex, shape = (N, 1024)
                 - redundant visibility ratios
             verbose : bool - be verbose
-
+        """
         
         self._mag_evaluator = Delay_Magnitude(data, verbose=verbose)
         self._sign_evaluator = Delay_Sign(data, verbose=verbose)
