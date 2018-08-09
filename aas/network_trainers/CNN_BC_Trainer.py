@@ -25,8 +25,9 @@ class CNN_BC_Trainer(NN_Trainer):
                  pretrained_model_path = None,
                  metric_names = ['costs', 'accuracies'],
                  sample_keep_prob = 0.80,
-                 downsample_keep_prob = 0.9,
-                 verbose = True):
+                 conv_keep_prob = 0.9,
+                 verbose = True,
+                 class_names = ['pos', 'neg']):
     
         NN_Trainer.__init__(self,
                             network = network,
@@ -41,8 +42,9 @@ class CNN_BC_Trainer(NN_Trainer):
         
 
         self.sample_keep_prob = sample_keep_prob
-        self.downsample_keep_prob = downsample_keep_prob
-
+        self.conv_keep_prob = conv_keep_prob
+        self.class_names = class_names
+        
     def train(self):
         
         self.save_params()
@@ -102,7 +104,7 @@ class CNN_BC_Trainer(NN_Trainer):
                         feed_dict = {self._network.X: training_inputs_batch,
                                      self._network.labels: training_labels_batch,
                                      self._network.sample_keep_prob : self.sample_keep_prob,
-                                     self._network.downsample_keep_prob : self.downsample_keep_prob,
+                                     self._network.conv_keep_prob : self.conv_keep_prob,
                                      self._network.is_training : True}
 
                         session.run([self._network.optimizer], feed_dict = feed_dict) 
@@ -110,7 +112,7 @@ class CNN_BC_Trainer(NN_Trainer):
                     train_feed_dict = {self._network.X: training_inputs.reshape(-1,1,1024,1),
                                        self._network.labels: training_labels.reshape(-1,2),
                                        self._network.sample_keep_prob : 1.,
-                                       self._network.downsample_keep_prob : 1.,
+                                       self._network.conv_keep_prob : 1.,
                                        self._network.is_training : False}
 
                     train_predicts =  session.run([self._network.predictions], train_feed_dict)
@@ -129,7 +131,7 @@ class CNN_BC_Trainer(NN_Trainer):
                     test_feed_dict = {self._network.X: testing_inputs.reshape(-1,1,1024,1),
                                       self._network.labels: testing_labels.reshape(-1,2),
                                       self._network.sample_keep_prob : 1.,
-                                      self._network.downsample_keep_prob : 1.,
+                                      self._network.conv_keep_prob : 1.,
                                       self._network.is_training : False} 
                                       
                     test_predicts =  session.run([self._network.predictions], test_feed_dict)
@@ -188,7 +190,7 @@ class CNN_BC_Trainer(NN_Trainer):
         labels = [label.argmax() for label in np.asarray(labels).reshape(-1,2)] # bc
         pred = [label.argmax() for label in np.asarray(pred).reshape(-1,2)] #bc
 
-        classes = ['pos','neg']#np.arange(len(set(labels)))
+        classes = self.class_names
 
         cm = confusion_matrix(labels, pred)
 
@@ -196,12 +198,8 @@ class CNN_BC_Trainer(NN_Trainer):
         cm = cm.astype('float')*100 / cm.sum(axis=1)[:, np.newaxis]
         cm = np.nan_to_num(cm, copy=True)
         cm = cm.astype('int')
-            #print("Normalized confusion matrix")
-        #else:
-            #print('Confusion matrix, without normalization')
 
         fig, ax = plt.subplots(figsize = (5,5), dpi = 144)
-        #plt.figure(figsize=(15,10))
         im = ax.imshow(cm, interpolation='nearest', aspect='auto', cmap=plt.cm.Oranges, vmin = 0, vmax = 100)
         ax.set_title(title)
         cbar = fig.colorbar(im)
@@ -215,7 +213,8 @@ class CNN_BC_Trainer(NN_Trainer):
         ax.set_xlabel('Predicted label')
         for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
             #s = '{:2.0}'.format(cm[i, j]) if cm[i,j] >= 1 else '.'
-            ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.', horizontalalignment="center", fontsize=15, verticalalignment='center', color= "black")
+            ax.text(j, i, format(cm[i, j], 'd') if cm[i,j]!=0 else '.',
+                    horizontalalignment="center", fontsize=15, verticalalignment='center', color= "black")
 
         # plt.show()
         buf = io.BytesIO()
