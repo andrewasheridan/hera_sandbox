@@ -1,13 +1,9 @@
 # CNN_DS_BN_C
 
-import sys, os
-
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
-
-from Restoreable_Component import Restoreable_Component
-
-import tensorflow as tf
+import sys
 import numpy as np
+import tensorflow as tf
+from Restoreable_Component import Restoreable_Component
 
 class CNN_DS_BN_C(Restoreable_Component):
     """ CNN_DS_BN_C() - Child of Restoreable_Component

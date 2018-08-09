@@ -1,10 +1,9 @@
 # Restoreable_Component
 
-from pprint import pprint
-import numpy as np
-import sys
 import os
-
+import sys
+import numpy as np
+from pprint import pprint
 
 class Restoreable_Component(object):
     """Restoreable_Component

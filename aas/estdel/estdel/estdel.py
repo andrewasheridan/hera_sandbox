@@ -1,18 +1,14 @@
-import os
-import sys
 import numpy as np
 import tensorflow as tf
-
-sys.path.insert(1, os.path.join(sys.path[0], '../networks/'))
 from CNN_DS_BN_C import CNN_DS_BN_C
 
 tf.logging.set_verbosity(tf.logging.WARN)
 
 # path to best postive-negative classifier
-PN_PATH = '../logs/CNN_DS_BN_C_2_401_aug7_POSNEG/trained_model.ckpt-5490'
+PN_PATH = '../../logs/CNN_DS_BN_C_2_401_aug7_POSNEG/trained_model.ckpt-5490'
 
 # path to best magnitude classifier
-MAG_PATH = '../logs/CNN_DS_BN_C_2_401_aug7_e/trained_model.ckpt-1000'
+MAG_PATH = '../../logs/CNN_DS_BN_C_2_401_aug7_e/trained_model.ckpt-1000'
 
 class DelayPredict(object):
     
