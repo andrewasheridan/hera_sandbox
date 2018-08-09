@@ -111,6 +111,8 @@ class CNN_C_Trainer(NN_Trainer):
         tf.reset_default_graph()
         
         self._network.create_graph()
+        self._network.save_params()
+        
         saver = tf.train.Saver()
 
         with tf.Session() as session:

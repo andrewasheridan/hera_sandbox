@@ -98,7 +98,7 @@ class CNN_DS_BN_C(Restoreable_Component):
     def create_graph(self):
         """ Create the network graph for use in a tensorflow session"""
 
-        self.save_params()
+        
         self._msg = '\rcreating network graph '; self._vprint(self._msg)
 
         
