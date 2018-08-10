@@ -16,9 +16,9 @@ Delay_Magnitude estimates the magnitude of the delay
 Cable_Delay provides Delay_Sign * Delay_Magnitude
 
 tau = # slope in range -0.0400 to 0.0400
-nu = np.arange(1024) # unitless frequency channels
+nu = _np.arange(1024) # unitless frequency channels
 phi = # phase in range 0 to 1
-data = np.exp(-2j*np.pi*(nu*tau + phi))
+data = _np.exp(-2j*_np.pi*(nu*tau + phi))
 
 estimator = estdel.Cable_Delay(data)
 prediction = estimator.predict()
@@ -27,20 +27,19 @@ prediction = estimator.predict()
 """
 
 
-import numpy as np
-import tensorflow as tf
-from CNN_DS_BN_C import CNN_DS_BN_C
+import numpy as _np
+import tensorflow as _tf
 
-tf.logging.set_verbosity(tf.logging.WARN)
+_tf.logging.set_verbosity(_tf.logging.WARN)
 
 # path to best postive-negative classifier
-PN_PATH = '../../logs/CNN_DS_BN_C_2_401_aug7_POSNEG/trained_model.ckpt-5490'
+SIGN_PATH = 'trained_models/sign/trained_model.ckpt-5490.meta'
 
 # path to best magnitude classifier
-MAG_PATH = '../../logs/CNN_DS_BN_C_2_401_aug7_e/trained_model.ckpt-1000'
+MAG_PATH = 'trained_models/mag/trained_model.ckpt-1000.meta'
 
-class DelayPredict(object):
-    """ DelayPredict
+class _DelayPredict(object):
+    """ _DelayPredict
 
         Base class for predictions using CNN_DS_BN_C networks
 
@@ -54,45 +53,53 @@ class DelayPredict(object):
     def _angle_tx(self, x):
         # assumes x is numpy array
         # scales (-pi,pi) to (0,1)
-        return (x + np.pi) / (2. * np.pi)
+        return (x + _np.pi) / (2. * _np.pi)
     
     def _preprocess_data(self):
-        return self._angle_tx(np.angle(self._data)).reshape(-1,1,self._n_freqs,1)
+        return self._angle_tx(_np.angle(self._data)).reshape(-1,1,self._n_freqs,1)
 
-    
-    def _predict(self):  
-        # construct a network graph
-        # load in pretrained variables
-        # return predicted class index
-        self._network.create_graph()
+    def _predict(self):
+
         
-        saver = tf.train.Saver()
-        with tf.Session() as session:
+        with _tf.Graph().as_default() as graph:
+            with _tf.Session() as session:
 
-            saver.restore(session, self._model_path)
-            
-            feed_dict = {self._network.X: self.data,
-                         self._network.sample_keep_prob : 1.,
-                         self._network.conv_keep_prob : 1.,
-                         self._network.is_training : False}
+                # restore saved graph and tensor values
+                saver = _tf.train.import_meta_graph(self._model_path)
+                saver.restore(session, self._model_path[:-5])
 
-            self._pred_cls = session.run([self._network.pred_cls], feed_dict = feed_dict)
-            session.close()
+                # add hooks to placeholders for feed dict
+                sample_keep_prob = graph.get_tensor_by_name('keep_probs/sample_keep_prob:0')
+                conv_keep_prob = graph.get_tensor_by_name('keep_probs/conv_keep_prob:0')
+                is_training = graph.get_tensor_by_name('is_training:0')
+                X = graph.get_tensor_by_name('sample/X:0')
 
-class Delay_Sign(DelayPredict):
+                # add hook to output operation
+                pred_cls = graph.get_tensor_by_name('predictions/ArgMax:0')
+                
+                feed_dict = {sample_keep_prob : 1.,
+                             conv_keep_prob : 1.,
+                             is_training : False,
+                             X: self.data}
 
-    def __init__(self, data, verbose=False):
+                # collect prediction
+                self._pred_cls = session.run(pred_cls, feed_dict = feed_dict)
+
+                session.close()
+
+class Delay_Sign(_DelayPredict):
+
+    def __init__(self, data):
         
-        DelayPredict.__init__(self, data = data)
-        
-        self._network = CNN_DS_BN_C('sign_eval', 3, 2, verbose=verbose)
+        _DelayPredict.__init__(self, data = data)
+
         self.data = self._preprocess_data()
-        self._model_path = PN_PATH
+        self._model_path = SIGN_PATH
 
     def _pred_cls_to_sign(self):
         # convert predicted class index to value
         # self._pred_cls has 0 for positive and 1 for negative
-        self.pred_signs = [1 if x == 0 else -1 for x in self._pred_cls[0]]
+        self.pred_signs = [1 if x == 0 else -1 for x in self._pred_cls]
          
         return self.pred_signs
     
@@ -103,33 +110,55 @@ class Delay_Sign(DelayPredict):
                 list of sign predictions
         """
         self._predict()
-        return self._pred_cls_to_sign()
+        self.predictions = self._pred_cls_to_sign()
+        return _np.array(self.predictions)
 
-class Delay_Magnitude(DelayPredict):
+class Delay_Magnitude(_DelayPredict):
 
-    def __init__(self, data, verbose=False):
-        
-        DelayPredict.__init__(self, data = data)
-        
-        self._network = CNN_DS_BN_C('mag_eval', 3, 401, verbose=verbose)
+    def __init__(self, data):
+
+        _DelayPredict.__init__(self, data = data)
+
         self.data = self._preprocess_data()
         self._model_path = MAG_PATH
 
     def _pred_cls_to_magnitude(self):
         # convert predicted class index to value
-        magnitudes = np.arange(0,0.04 + 0.0001, 0.0001)
-        self.pred_mags = [magnitudes[x] for x in self._pred_cls[0]]
+        magnitudes = _np.arange(0,0.04 + 0.0001, 0.0001)
+        self.pred_mags = [magnitudes[x] for x in self._pred_cls]
          
         return self.pred_mags
     
-    def predict(self):
+    def predict(self, conversion_fn):
         """ predict
 
             Returns:
                 list of magnitude predictions
         """
+        self._conversion_fn = conversion_fn
         self._predict()
-        return self._pred_cls_to_magnitude()
+        self.raw_predictions = self._pred_cls_to_magnitude()
+
+        if self._conversion_fn is None:
+            
+            self.predictions = self.raw_predictions
+
+        elif self._conversion_fn == 'default':
+
+            # this is a sorta dumb way to do this
+
+            # 0.100 GHz - 0.200 GHz range
+            freqs = _np.linspace(0.100,0.200,1024) 
+            channel_width_in_GHz = _np.mean(_np.diff(freqs))
+
+            # predictions now in nanoseconds
+            self.predictions = _np.round(self.raw_predictions / channel_width_in_GHz,1)
+
+        else:
+            self.predictions = self._conversion_fn(self.raw_predictions)
+
+        return _np.array(self.predictions)
+
 
 class Cable_Delay(object):
     """ Cable_Delay
@@ -141,7 +170,7 @@ class Cable_Delay(object):
             - call to make prediction
     """
     
-    def __init__(self, data, verbose=False):
+    def __init__(self, data):
         """ Preprocesses data for prediction.
 
             - converts complex data to angle
@@ -156,16 +185,17 @@ class Cable_Delay(object):
             verbose : bool - be verbose
         """
         
-        self._mag_evaluator = Delay_Magnitude(data, verbose=verbose)
-        self._sign_evaluator = Delay_Sign(data, verbose=verbose)
+        self._mag_evaluator = Delay_Magnitude(data)
+        self._sign_evaluator = Delay_Sign(data)
     
-    def predict(self):
+    def predict(self, conversion_fn='default'):
         """ predict
 
             Returns:
                 list of predictions
         """
-        self.signs = self._sign_evaluator.predict()
-        self.mags = self._mag_evaluator.predict()
-        
-        return np.array(self.signs)*np.array(self.mags)
+        signs = self._sign_evaluator.predict()
+        mags = self._mag_evaluator.predict(conversion_fn=conversion_fn)
+        self.raw_predictions = [self._mag_evaluator.raw_predictions[i]*signs[i] for i in range(len(signs))]
+        self.predictions = signs*mags
+        return self.predictions
