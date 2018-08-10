@@ -33,10 +33,10 @@ import tensorflow as _tf
 _tf.logging.set_verbosity(_tf.logging.WARN)
 
 # path to best postive-negative classifier
-_SIGN_PATH = 'trained_models/sign/trained_model.ckpt-5490.meta'
+_SIGN_PATH = 'trained_models/sign_NN_frozen.pb'
 
 # path to best magnitude classifier
-_MAG_PATH = 'trained_models/mag/trained_model.ckpt-1000.meta'
+_MAG_PATH = 'trained_models/mag_NN_frozen.pb'
 
 class _DelayPredict(object):
     """ _DelayPredict
@@ -60,32 +60,32 @@ class _DelayPredict(object):
 
     def _predict(self):
 
-        
+        with _tf.gfile.GFile(self._model_path, "rb") as f:
+            restored_graph_def = _tf.GraphDef()
+            restored_graph_def.ParseFromString(f.read())
+
         with _tf.Graph().as_default() as graph:
-            with _tf.Session() as session:
+            _tf.import_graph_def(restored_graph_def, input_map=None, return_elements=None, name="")
 
-                # restore saved graph and tensor values
-                saver = _tf.train.import_meta_graph(self._model_path)
-                saver.restore(session, self._model_path[:-5])
+            sample_keep_prob = graph.get_tensor_by_name('keep_probs/sample_keep_prob:0')
+            conv_keep_prob = graph.get_tensor_by_name('keep_probs/conv_keep_prob:0')
+            is_training = graph.get_tensor_by_name('is_training:0')
+            X = graph.get_tensor_by_name('sample/X:0')
 
-                # add hooks to placeholders for feed dict
-                sample_keep_prob = graph.get_tensor_by_name('keep_probs/sample_keep_prob:0')
-                conv_keep_prob = graph.get_tensor_by_name('keep_probs/conv_keep_prob:0')
-                is_training = graph.get_tensor_by_name('is_training:0')
-                X = graph.get_tensor_by_name('sample/X:0')
+            # add hook to output operation
+            pred_cls = graph.get_tensor_by_name('predictions/ArgMax:0')
 
-                # add hook to output operation
-                pred_cls = graph.get_tensor_by_name('predictions/ArgMax:0')
-                
-                feed_dict = {sample_keep_prob : 1.,
-                             conv_keep_prob : 1.,
-                             is_training : False,
-                             X: self.data}
+        with _tf.Session(graph=graph) as sess:
+            feed_dict = {sample_keep_prob : 1.,
+                         conv_keep_prob : 1.,
+                         is_training : False,
+                         X: self.data}
 
-                # collect prediction
-                self._pred_cls = session.run(pred_cls, feed_dict = feed_dict)
+            # collect prediction
+            self._pred_cls = sess.run(pred_cls, feed_dict = feed_dict)
 
-                session.close()
+            sess.close()
+
 
 class Cable_Delay_Sign(_DelayPredict):
     """ Cable_Delay
