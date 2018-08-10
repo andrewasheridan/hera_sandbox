@@ -33,15 +33,15 @@ import tensorflow as _tf
 _tf.logging.set_verbosity(_tf.logging.WARN)
 
 # path to best postive-negative classifier
-SIGN_PATH = 'trained_models/sign/trained_model.ckpt-5490.meta'
+_SIGN_PATH = 'trained_models/sign/trained_model.ckpt-5490.meta'
 
 # path to best magnitude classifier
-MAG_PATH = 'trained_models/mag/trained_model.ckpt-1000.meta'
+_MAG_PATH = 'trained_models/mag/trained_model.ckpt-1000.meta'
 
 class _DelayPredict(object):
     """ _DelayPredict
 
-        Base class for predictions using CNN_DS_BN_C networks
+        Base class for predictions
 
     """
     
@@ -87,14 +87,37 @@ class _DelayPredict(object):
 
                 session.close()
 
-class Delay_Sign(_DelayPredict):
+class Cable_Delay_Sign(_DelayPredict):
+    """ Cable_Delay
 
+    Estimates cable delay by using two pretrained neural networks.
+
+    Methods:
+        predict()
+            - call to make prediction
+
+    Arrtributes:
+        raw_predictions : (list of floats) - The raw sign predictions from the network
+        predictions : numpy array of floats = The raw sign predictions as a numpy array 
+    """
     def __init__(self, data):
-        
+        """ Preprocesses data for prediction.
+
+            - converts complex data to angle
+            - scales angles to range preferred by networks
+            - reshapes 2D data to 4D tensor
+    
+
+        Args:
+
+            data : list, complex, shape = (N, 1024)
+                - redundant visibility ratios
+
+        """
         _DelayPredict.__init__(self, data = data)
 
         self.data = self._preprocess_data()
-        self._model_path = SIGN_PATH
+        self._model_path = _SIGN_PATH
 
     def _pred_cls_to_sign(self):
         # convert predicted class index to value
@@ -107,20 +130,45 @@ class Delay_Sign(_DelayPredict):
         """ predict
 
             Returns:
-                list of sign predictions
+                numpy array of sign predictions
         """
         self._predict()
-        self.predictions = self._pred_cls_to_sign()
-        return _np.array(self.predictions)
+        self.raw_predictions = self._pred_cls_to_sign()
+        self.predictions = _np.array(self.raw_predictions)
 
-class Delay_Magnitude(_DelayPredict):
+        return self.predictions
 
+class Cable_Delay_Magnitude(_DelayPredict):
+    """ Cable_Delay
+
+    Estimates cable delay by using two pretrained neural networks.
+
+    Methods:
+        predict()
+            - call to make prediction
+
+    Arrtributes:
+        raw_predictions : (list of floats) - The raw magnitude predictions from the network
+        predictions : numpy array of floats = The converted raw magnitude predictions (see predict())
+    """
     def __init__(self, data):
+        """ Preprocesses data for prediction.
 
+            - converts complex data to angle
+            - scales angles to range preferred by networks
+            - reshapes 2D data to 4D tensor
+    
+
+        Args:
+
+            data : list, complex, shape = (N, 1024)
+                - redundant visibility ratios
+
+        """
         _DelayPredict.__init__(self, data = data)
 
         self.data = self._preprocess_data()
-        self._model_path = MAG_PATH
+        self._model_path = _MAG_PATH
 
     def _pred_cls_to_magnitude(self):
         # convert predicted class index to value
@@ -129,11 +177,19 @@ class Delay_Magnitude(_DelayPredict):
          
         return self.pred_mags
     
-    def predict(self, conversion_fn):
+    def predict(self, conversion_fn='default'):
         """ predict
 
+            Args:
+                conversion_fn (None, 'default', or function
+                    - None - Do no conversion, output predictions are the raw predictions
+                    - 'default' - convert raw predictions to ns by using frequencies 
+                        with a 100MHz range over 1024 channels
+                    - OR provide your own function to do the conversion
+                        - one required argument, the raw predictions
+
             Returns:
-                list of magnitude predictions
+                numpy array of predictions
         """
         self._conversion_fn = conversion_fn
         self._predict()
@@ -168,6 +224,10 @@ class Cable_Delay(object):
     Methods:
         predict()
             - call to make prediction
+
+    Arrtributes:
+        raw_predictions : (list of floats) - The raw predictions from the network
+        predictions : numpy array of floats = The converted raw predictions (see predict())
     """
     
     def __init__(self, data):
@@ -182,17 +242,27 @@ class Cable_Delay(object):
 
             data : list, complex, shape = (N, 1024)
                 - redundant visibility ratios
-            verbose : bool - be verbose
+
         """
         
-        self._mag_evaluator = Delay_Magnitude(data)
-        self._sign_evaluator = Delay_Sign(data)
+        self._mag_evaluator = Cable_Delay_Magnitude(data)
+        self._sign_evaluator = Cable_Delay_Sign(data)
     
     def predict(self, conversion_fn='default'):
         """ predict
 
+            Args:
+                conversion_fn (None, 'default', or function(x))
+                    - None - Do no conversion, output predictions are the raw predictions
+                    - 'default' - convert raw predictions to ns by using frequencies 
+                        with a 100MHz range over 1024 channels
+                    - OR provide your own function to do the conversion
+                        - takes in one argument, the raw predictions
+
+
+
             Returns:
-                list of predictions
+                numpy array of predictions
         """
         signs = self._sign_evaluator.predict()
         mags = self._mag_evaluator.predict(conversion_fn=conversion_fn)
