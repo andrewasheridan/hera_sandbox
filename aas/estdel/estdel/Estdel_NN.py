@@ -1,12 +1,11 @@
-# CNN_DS_BN_C
+# Estdel_NN
 
 import sys
 import numpy as np
 import tensorflow as tf
-from Restoreable_Component import Restoreable_Component
 
-class CNN_DS_BN_C(Restoreable_Component):
-    """ CNN_DS_BN_C() - Child of Restoreable_Component
+class Estdel_NN(object):
+    """ Estdel_NN - Copy of CNN_DS_BN_C (Aug_7)
 
         CNN: Convolutional Neural Network.
         DS: DownSampling. Each layer ends with a downsampling convolution
@@ -15,7 +14,7 @@ class CNN_DS_BN_C(Restoreable_Component):
 
         Network Structure:
 
-            Incoming sample has dropout sample_keep_prob - set with Trainer
+            Incoming sample has dropout sample_keep_prob - set on evaluation
  
             Each layer has 4 convolutions, each with 4**(i+1) filters (i = zero based layer index).
                 - Each convolution:
@@ -23,7 +22,7 @@ class CNN_DS_BN_C(Restoreable_Component):
                     - feeds into the next
                     - has a filter of size (1, fw)
                     - has biases and a LeakyReLU activation
-                    - has dropout with conv_keep_prob - set with Trainer
+                    - has dropout with conv_keep_prob - set on evaluation
                     - has batch normalization
                 - Filter widths (fw) of the four convolutions are [3,5,7,9]
                 TODO: Optional filter widths? (different per layer?)
@@ -35,54 +34,32 @@ class CNN_DS_BN_C(Restoreable_Component):
             Predictions are softmax probabilites
         
         Args:
-            name (string)   - The name of the network. Used as name of log subdir
             num_downsamples (int)   - The number of downsample convolutions 
                                     - The number of layers
             num_classes (int)   - The number of classification labels
                                 - Must be one of : 9, 81, 161, 401
-            log_dir (string)   - Parent directory of network parameter storage
-                            - On create_graph() network parameters are stored here
             dtype (class)   - Datatype for network. tf.float16 will change Adam epsilon from 1e-8 to 1e-4
             adam_initial_learning_rate (float)  -   Adam optimizer initial learning rate
                                                 -   Will decay over time as per Adam docs.
             verbose (bool)  - Be verbose.
 
         Usage :
-            - create object and set args (or load params)
-
-            Training :
-                - pass object into appropriate network Trainer object
-                - trainer will run create_graph()
-
-            Structure Check:
-                - run create_graph()
-                - call network._layers to see layer output dimensions
-                TODO: Make structure check better
-                    - should directly access _layers
-                    - should add save graph for tensorboard ?
-
-            Other:
+            Evaluation:
                 - run create_graph()
                 - start tensorflow session
 
         Methods:
             - create_graph() - Contructs the network graph
 
-        Parent:
-
-       """
-    __doc__ += Restoreable_Component.__doc__
+    """
 
     def __init__(self,
-                 name,
                  num_downsamples,
                  num_classes,
-                 log_dir = '../logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
                  verbose = True):
     
-        Restoreable_Component.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.num_downsamples = num_downsamples
         self.dtype = dtype
@@ -90,6 +67,8 @@ class CNN_DS_BN_C(Restoreable_Component):
         self._num_freq_channels = 1024
         self._layers = []
         self.num_classes = num_classes #  classifier...
+        self._vprint = sys.stdout.write if verbose else lambda *a, **k: None # for verbose printing
+
 
     def create_graph(self):
         """ Create the network graph for use in a tensorflow session"""
@@ -141,7 +120,6 @@ class CNN_DS_BN_C(Restoreable_Component):
                         
             self._layers.append(layer)              
                 
-        self._msg += ' '
         with tf.variable_scope('labels'):
             self._msg += '.'; self._vprint(self._msg)
             
@@ -196,4 +174,4 @@ class CNN_DS_BN_C(Restoreable_Component):
             self.summary = tf.summary.merge_all()
             
         num_trainable_params = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
-        self._msg = '\rnetwork Ready - {} trainable parameters'.format(num_trainable_params); self._vprint(self._msg)
+        self._msg = '\rnetwork Ready - {} parameters'.format(num_trainable_params); self._vprint(self._msg)
