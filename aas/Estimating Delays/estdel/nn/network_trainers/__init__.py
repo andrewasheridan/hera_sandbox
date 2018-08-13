@@ -1,0 +1,5 @@
+from NN_Trainer import NN_Trainer 
+from CNN_BC_Trainer import CNN_BC_Trainer
+from CNN_C_Trainer import CNN_C_Trainer
+from CNN_DS_BN_R_Trainer import CNN_DS_BN_R_Trainer
+from CNN_R_Trainer import CNN_R_Trainer
