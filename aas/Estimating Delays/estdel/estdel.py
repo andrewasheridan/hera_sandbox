@@ -27,17 +27,19 @@ prediction = estimator.predict()
 # prediction should output tau
 """
 
-
+import pkg_resources
 import numpy as np
 import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.WARN)
 
-# path to best postive-negative classifier
-_SIGN_PATH = 'trained_models/sign_NN_frozen.pb'
+_TRAINED_MODELS_DIR = 'trained_models'
 
-# path to best magnitude classifier
-_MAG_PATH = 'trained_models/mag_NN_frozen.pb'
+# fn for best postive-negative classifier
+_SIGN_PATH = 'sign_NN_frozen.pb'
+
+# fn for best magnitude classifier
+_MAG_PATH = 'mag_NN_frozen.pb'
 
 
 
@@ -96,7 +98,12 @@ class _DelayPredict(object):
         feed data, and make prediction.
 
         """
-        with tf.gfile.GFile(self._model_path, "rb") as f:
+
+        resource_package = __name__ 
+        resource_path = '/'.join((_TRAINED_MODELS_DIR, self._model_path))
+        path = pkg_resources.resource_filename(resource_package, resource_path)
+
+        with tf.gfile.GFile(path, "rb") as f:
             restored_graph_def = tf.GraphDef()
             restored_graph_def.ParseFromString(f.read())
 
