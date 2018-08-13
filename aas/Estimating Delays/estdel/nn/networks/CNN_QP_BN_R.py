@@ -2,14 +2,12 @@
 
 import sys, os
 
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
-
-from Restoreable_Component import Restoreable_Component
+from RestoreableComponent import RestoreableComponent
 
 import tensorflow as tf
 import numpy as np
 
-class CNN_QP_BN_R(Restoreable_Component):
+class CNN_QP_BN_R(RestoreableComponent):
     """CNN: Convolutional neural network.
        QP: Each computational layer is a quad-path layer.
        BN: All non-linearalities have batch-normalization applied.
@@ -28,7 +26,7 @@ class CNN_QP_BN_R(Restoreable_Component):
                  gaussian_shift_scalar = 1e-5,
                  verbose = True):
     
-        Restoreable_Component.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
+        RestoreableComponent.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.wide_convolution_filter_widths = wide_convolution_filter_widths
         self.layer_downsampling_factors = layer_downsampling_factors

@@ -1,39 +1,34 @@
-# FNN_BN_R
+# CNN_DSFC_BN_R
 
 import sys, os
 
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
-
-from Restoreable_Component import Restoreable_Component
+from RestoreableComponent import RestoreableComponent
 
 import tensorflow as tf
 import numpy as np
 
-class FNN_BN_R(Restoreable_Component):
-    """A neural network of fully connected layers.
-    
-    First layer has Leaky_ReLU activation. Other layers have ReLU activation.
-    Input sample has dropout at rate 1 - sample_keep_prob.
+class CNN_DSFC_BN_R(RestoreableComponent):
+    """ CNN: Convolutional Neural Network.
+        DS: DownSampling. Each convolution is followed by a downsampling convolution
+        FC: After the chain of convolutions there is a chain of fully connected layers.
+        BN: All non-linearalities have batch-normalization applied.
+        R: Regression, this network takes in a sample and returns a value.
+ 
+        Each layer starts with a 1x3 convolution with 2**i filters (i = layer index) with stride of 1.
+        This is fed into a 1x5 convolution with the same number of filters, but stride of 2 (50% downsample)
 
-    Args
-        layer_nodes - (list of ints) - Number of nodes in each fully connected layer.
-        cost - (string) - Name of the cost function
-            - MSE, MQE, MISG, PWT_weighted_MSE, or PWT_weighted_MISG
-            - MSE - mean squared error
-            - MQE - log of mean sqaure of squared error) - experimental
-            - MISG - mean inverse shifted gaussian
-            - PWT_weighted_MSE - (PWT - 100)*MSE - experimental
-            - PWT_weighted_MISG - (PWT - 100)*MISG - experimental
-        accuracy_threshold - (float) - the value for a target to be considered 'good'
-        gaussian_shift_scalar - (float) - scalar to shift the gaussian with
-            - also scales the value of MSE and MISG for no reason
-                - because i liked the numbers to be large
-        
-    """
+        Leaky_ReLU and batch normalization is applied after each convolution. Downsamples convolutions have dropout.
+        Biases are added before activations.
+
+        Output of last layer is fed to fully connected layer with relu activation
+
+        Cost function is mean squared error
+
+       """
 
     def __init__(self,
                  name,
-                 layer_nodes,
+                 num_downsamples,
                  cost = 'MSE',
                  log_dir = '../logs/',
                  dtype = tf.float32,
@@ -42,9 +37,9 @@ class FNN_BN_R(Restoreable_Component):
                  gaussian_shift_scalar = 1e-5,
                  verbose = True):
     
-        Restoreable_Component.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
+        RestoreableComponent.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
-        self.layer_nodes = layer_nodes
+        self.num_downsamples = num_downsamples
         
         self.dtype = dtype
         self.adam_initial_learning_rate = adam_initial_learning_rate
@@ -72,36 +67,75 @@ class FNN_BN_R(Restoreable_Component):
             self._msg += '.'; self._vprint(self._msg)
 
             self.sample_keep_prob = tf.placeholder(self.dtype, name = 'sample_keep_prob')
-            self.fcl_keep_prob = tf.placeholder(self.dtype, name = 'fcl_keep_prob')
+            self.downsample_keep_prob = tf.placeholder(self.dtype, name = 'downsample_keep_prob')
         
         
         with tf.variable_scope('sample'):
             
             self._msg += '.'; self._vprint(self._msg)
             
-            self.X = tf.placeholder(self.dtype, shape = [None,self._num_freq_channels], name = 'X')
+            self.X = tf.placeholder(self.dtype, shape = [None, 1, self._num_freq_channels, 1], name = 'X')
             self.X = tf.nn.dropout(self.X, self.sample_keep_prob)
             
-        with tf.variable_scope('input_layer'):
+        trainable = lambda shape, name : tf.get_variable(name = name,
+                                                         dtype = self.dtype,
+                                                         shape = shape,
+                                                         initializer = tf.contrib.layers.xavier_initializer())
+        for i in range(self.num_downsamples):
+            self._msg += '.'; self._vprint(self._msg)
             
-            b = tf.get_variable(name = 'biases', shape = [self.layer_nodes[0]],
-                                initializer = tf.contrib.layers.xavier_initializer())
-            
-            w = tf.get_variable(name = 'weights', shape  = [1024, self.layer_nodes[0]],
-                                initializer = tf.contrib.layers.xavier_initializer())
-            
-            layer = tf.nn.leaky_relu(tf.matmul(self.X, w) + b)
-            layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
-            layer = tf.nn.dropout(layer, self.fcl_keep_prob)
-            self._layers.append(layer)
-            
-        for i in range(len(self.layer_nodes)):
-            if i > 0:
-                with tf.variable_scope('layer_%d' %(i)):
-                    layer = tf.contrib.layers.fully_connected(self._layers[i-1], self.layer_nodes[i])
-                    layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
-                    self._layers.append(layer)
+            with tf.variable_scope('conv_layer_{}'.format(i)):
 
+                layer = self.X if i == 0 else self._layers[-1]
+                
+                # filter shape:
+                fh = 1 # filter height = 1 for 1D convolution
+                fw = 3 # filter width
+                fic = 2**(i) # num in channels = number of incoming filters
+                foc = 2**(i+1) # num out channels = number of outgoing filters
+                filters = trainable([fh, fw, fic, foc], 'filters')
+                
+                # stride shape
+                sN = 1 # batch = 1 (why anything but 1 ?)
+                sH = 1 # height of stride = 1 for 1D conv
+                sW = 1 # width of stride = downsampling factor = 1 for no downsampling or > 1 for downsampling
+                sC = 1 # depth = number of channels the stride walks over = 1 (why anything but 1 ?)
+                strides_no_downsample = [sN, sH, sW, sC]
+                layer = tf.nn.conv2d(layer, filters, strides_no_downsample, 'SAME')
+                
+                # shape of biases = [num outgoing filters]
+                biases = trainable([foc], 'biases')
+                layer = tf.nn.bias_add(layer, biases)
+                layer = tf.nn.leaky_relu(layer)
+                layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
+                
+                # downsample
+                with tf.variable_scope('downsample'):
+                    fw = 5
+                    filters = trainable([fh, fw, foc, foc], 'filters')
+
+                    sW = 2
+                    strides_no_downsample = [sN, sH, sW, sC]
+                    layer = tf.nn.conv2d(layer, filters, strides_no_downsample, 'SAME')
+
+                    # shape of biases = [num outgoing filters]
+                    biases = trainable([foc], 'biases')
+                    layer = tf.nn.bias_add(layer, biases)
+                    layer = tf.nn.leaky_relu(layer)
+                    layer = tf.nn.dropout(layer, self.downsample_keep_prob)
+                    layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
+
+                self._layers.append(layer)
+
+        self.layer_nodes = 2**np.arange(0,10)[:self.num_downsamples][::-1]
+        for j in range(len(self.layer_nodes)):
+            
+            self._msg += '.'; self._vprint(self._msg)
+            
+            with tf.variable_scope('fc_layer_{}'.format(j)):
+                layer = tf.contrib.layers.fully_connected(self._layers[-1], self.layer_nodes[j])
+                layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
+                self._layers.append(layer)
                               
         
                 

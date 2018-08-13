@@ -1,6 +1,5 @@
 import sys, os
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
-from Restoreable_Component import Restoreable_Component
+from estdel.nn.networks import RestoreableComponent
 
 
 # NN_Trainer
@@ -8,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os, io
 
-class NN_Trainer(Restoreable_Component):
+class NN_Trainer(RestoreableComponent):
     """ Parent for restoreable neural network trainer (does not include training method).
         Add train method particular to network.
 
@@ -25,7 +24,7 @@ class NN_Trainer(Restoreable_Component):
             metric_names - (list of strings) - Names of the various metrics for this trainer
             verbose - (bool) - Be verbose.
     """
-    __doc__ += Restoreable_Component.__doc__
+    __doc__ += RestoreableComponent.__doc__
     
     def __init__(self,
                  network,
@@ -38,7 +37,7 @@ class NN_Trainer(Restoreable_Component):
                  metric_names,
                  verbose = True):
     
-        Restoreable_Component.__init__(self, name=network.name, log_dir=log_dir, verbose=verbose)
+        RestoreableComponent.__init__(self, name=network.name, log_dir=log_dir, verbose=verbose)
         
         self._network = network   
         self._Data_Creator = Data_Creator

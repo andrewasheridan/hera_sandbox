@@ -2,15 +2,13 @@
 
 import sys, os
 
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
-
-from Restoreable_Component import Restoreable_Component
+from RestoreableComponent import RestoreableComponent
 
 import tensorflow as tf
 import numpy as np
 
-class CNN_DS_BN_C(Restoreable_Component):
-    """ CNN_DS_BN_C() - Child of Restoreable_Component
+class CNN_DS_BN_C(RestoreableComponent):
+    """ CNN_DS_BN_C() - Child of RestoreableComponent
 
         CNN: Convolutional Neural Network.
         DS: DownSampling. Each layer ends with a downsampling convolution
@@ -75,7 +73,7 @@ class CNN_DS_BN_C(Restoreable_Component):
         Parent:
 
        """
-    __doc__ += Restoreable_Component.__doc__
+    __doc__ += RestoreableComponent.__doc__
 
     def __init__(self,
                  name,
@@ -86,7 +84,7 @@ class CNN_DS_BN_C(Restoreable_Component):
                  adam_initial_learning_rate = 0.0001,
                  verbose = True):
     
-        Restoreable_Component.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
+        RestoreableComponent.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.num_downsamples = num_downsamples
         self.dtype = dtype
