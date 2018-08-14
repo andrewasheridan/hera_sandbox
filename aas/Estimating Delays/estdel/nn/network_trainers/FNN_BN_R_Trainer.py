@@ -1,7 +1,6 @@
 # FNN_BN_R_Trainer
 
 import sys, os
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
 from NN_Trainer import NN_Trainer
 
 import tensorflow as tf
@@ -19,9 +18,9 @@ class FNN_BN_R_Trainer(NN_Trainer):
                  log_dir = '../logs/',
                  model_save_interval = 25,
                  pretrained_model_path = None,
-                 metric_names = ['MISGs', 'MSEs', 'MQEs', 'PWTs'],
+                 metric_names = ['MISGs', 'MSEs', 'PWTs'],
                  sample_keep_prob = 0.80,
-                 fcl_keep_prob = 0.9,
+                 dropconnect_keep_prob = 0.9,
                  verbose = True):
     
         NN_Trainer.__init__(self,
@@ -37,7 +36,7 @@ class FNN_BN_R_Trainer(NN_Trainer):
         
 
         self.sample_keep_prob = sample_keep_prob
-        self.fcl_keep_prob = fcl_keep_prob
+        self.dropconnect_keep_prob = dropconnect_keep_prob
         
     def train(self):
         
@@ -47,7 +46,6 @@ class FNN_BN_R_Trainer(NN_Trainer):
 
         MISGs = []
         MSEs = []
-        MQEs = []
         PWTs = []
         
         tf.reset_default_graph()
@@ -93,7 +91,6 @@ class FNN_BN_R_Trainer(NN_Trainer):
                             self._msg += ' - (Training, Testing) - '.format(epoch)
                             self._msg += ' MISG: ({:0.4f}, {:0.4f})'.format(training_MISG, testing_MISG)
                             self._msg += ' MSE: ({:0.4f}, {:0.4f})'.format(training_MSE, testing_MSE)
-                            self._msg += ' MQE: ({:0.4f}, {:0.4f})'.format(training_MQE, testing_MQE)                   
                             self._msg += ' PWT: ({:2.2f}, {:2.2f})'.format(training_PWT, testing_PWT)
 
 
@@ -104,7 +101,7 @@ class FNN_BN_R_Trainer(NN_Trainer):
                         feed_dict = {self._network.X: training_inputs_batch,
                                      self._network.targets: training_targets_batch,
                                      self._network.sample_keep_prob : self.sample_keep_prob,
-                                     self._network.fcl_keep_prob : self.fcl_keep_prob,
+                                     self._network.dropconnect_keep_prob : self.dropconnect_keep_prob,
                                      self._network.is_training : True}
 
 
@@ -134,23 +131,22 @@ class FNN_BN_R_Trainer(NN_Trainer):
                     PST = session.run(self._network.predictions,
                                       feed_dict = {self._network.X: training_inputs.reshape(-1,1024),
                                                    self._network.sample_keep_prob : 1.,
-                                                   self._network.fcl_keep_prob : 1.,
+                                                   self._network.dropconnect_keep_prob : 1.,
                                                    self._network.is_training : False}) 
 
                     train_feed_dict = {self._network.X: training_inputs.reshape(-1,1024),
                                        self._network.targets: training_targets.reshape(-1,1),
                                        self._network.sample_keep_prob : 1.,
-                                       self._network.fcl_keep_prob : 1.,
+                                       self._network.dropconnect_keep_prob : 1.,
                                        self._network.image_buf: self.gen_plot(PST, training_targets, itx),
                                        self._network.is_training : False}
 
 
-                    training_MISG, training_MSE, training_MQE, training_PWT, training_summary = session.run([self._network.MISG,
-                                                                                                             self._network.MSE,
-                                                                                                             self._network.MQE,
-                                                                                                             self._network.PWT,
-                                                                                                             self._network.summary],
-                                                                                                             feed_dict = train_feed_dict) 
+                    training_MISG, training_MSE, training_PWT, training_summary = session.run([self._network.MISG,
+                                                                                               self._network.MSE,
+                                                                                               self._network.PWT,
+                                                                                               self._network.summary],
+                                                                                               feed_dict = train_feed_dict) 
 
                     training_writer.add_summary(training_summary, epoch)
                     training_writer.flush()  
@@ -159,22 +155,21 @@ class FNN_BN_R_Trainer(NN_Trainer):
                     PST = session.run(self._network.predictions,
                                       feed_dict = {self._network.X: testing_inputs.reshape(-1,1024),
                                                    self._network.sample_keep_prob : 1.,
-                                                   self._network.fcl_keep_prob : 1.,
+                                                   self._network.dropconnect_keep_prob : 1.,
                                                    self._network.is_training : False}) 
 
                     test_feed_dict = {self._network.X: testing_inputs.reshape(-1,1024),
                                       self._network.targets: testing_targets.reshape(-1,1),
                                       self._network.sample_keep_prob : 1.,
-                                      self._network.fcl_keep_prob : 1.,
+                                      self._network.dropconnect_keep_prob : 1.,
                                       self._network.image_buf: self.gen_plot(PST,testing_targets, itx),
                                       self._network.is_training : False} 
 
-                    testing_MISG, testing_MSE, testing_MQE, testing_PWT, testing_summary = session.run([self._network.MISG,
-                                                                                                        self._network.MSE,
-                                                                                                        self._network.MQE,
-                                                                                                        self._network.PWT,
-                                                                                                        self._network.summary],
-                                                                                                        feed_dict = test_feed_dict)
+                    testing_MISG, testing_MSE, testing_PWT, testing_summary = session.run([self._network.MISG,
+                                                                                           self._network.MSE,
+                                                                                           self._network.PWT,
+                                                                                           self._network.summary],
+                                                                                           feed_dict = test_feed_dict)
 
 
 
@@ -184,7 +179,6 @@ class FNN_BN_R_Trainer(NN_Trainer):
 
                     MISGs.append((training_MISG, testing_MISG))
                     MSEs.append((training_MSE, testing_MSE))
-                    MQEs.append((training_MQE, testing_MQE))
                     PWTs.append((training_PWT, testing_PWT))
 
                     if (epoch + 1) % self.model_save_interval == 0:
@@ -202,6 +196,6 @@ class FNN_BN_R_Trainer(NN_Trainer):
         session.close()
         self._msg += ' - session closed'; self._vprint(self._msg)
         
-        self._metrics = [MISGs, MSEs, MQEs, PWTs]
+        self._metrics = [MISGs, MSEs, PWTs]
         self.save_metrics()
         

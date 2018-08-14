@@ -17,16 +17,15 @@ class FNN_BN_R(RestoreableComponent):
     Attributes:
         accuracy_threshold (float): the value for a target to be considered 'good'
         adam_initial_learning_rate (float): Adam optimizer initial learning rate
-        cost (str): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+        cost_name (str): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
             - use 'MSE', others experimental
         dtype (tensorflow obj): type used for all computations
-        fcl_keep_prob (tensorflow obj): keep prob for fully connected layers
+        dropconnect_keep_prob (tensorflow obj): keep prob for weights
         gaussian_shift_scalar (float): value to shift gaussian for 'MISG' cost
         image_buf (tensorflow obj): buffer for image summaries for tensorboard
         is_training (tensorflow obj): flag for batch normalization
         layer_nodes (list of ints): numbers of nodes in each layer
         MISG (tensorflow obj): cost function, experimental. Mean Inverse Shifted Gaussian 
-        MQE (tensorflow obj): cost function, experimental. Mean Quad Error
         MSE (tensorflow obj): cost function. Mean Squared Error
         optimizer (tensorflow obj): optimization function
         predictions (tensorflow obj): predicted outputs
@@ -41,8 +40,8 @@ class FNN_BN_R(RestoreableComponent):
     def __init__(self,
                  name,
                  layer_nodes,
-                 cost = 'MSE',
-                 log_dir = '../logs/',
+                 cost_name = 'MSE',
+                 log_dir = 'logs/',
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
                  accuracy_threshold = 0.00625,
@@ -53,7 +52,7 @@ class FNN_BN_R(RestoreableComponent):
         Args:
             name (str): name of network
             layer_nodes (list of ints): numbers of nodes in each layer
-            cost (str, optional): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+            cost_name (str, optional): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
                     - use 'MSE', others experimental
             log_dir (str, optional): Directory to store network model and params
             dtype (tensorflow obj, optional): type used for all computations
@@ -70,7 +69,7 @@ class FNN_BN_R(RestoreableComponent):
         self.adam_initial_learning_rate = adam_initial_learning_rate
         self.accuracy_threshold = accuracy_threshold
         self.gaussian_shift_scalar = gaussian_shift_scalar
-        self.cost = cost
+        self.cost_name = cost_name
         
 
         self._num_freq_channels = 1024
@@ -95,7 +94,7 @@ class FNN_BN_R(RestoreableComponent):
             self._msg += '.'; self._vprint(self._msg)
 
             self.sample_keep_prob = tf.placeholder(self.dtype, name = 'sample_keep_prob')
-            self.fcl_keep_prob = tf.placeholder(self.dtype, name = 'fcl_keep_prob')
+            self.dropconnect_keep_prob = tf.placeholder(self.dtype, name = 'dropconnect_keep_prob')
         
         
         with tf.variable_scope('sample'):
@@ -112,16 +111,24 @@ class FNN_BN_R(RestoreableComponent):
             
             w = tf.get_variable(name = 'weights', shape  = [1024, self.layer_nodes[0]],
                                 initializer = tf.contrib.layers.xavier_initializer())
+            w = tf.nn.dropout(w, self.dropconnect_keep_prob) * self.dropconnect_keep_prob
             
             layer = tf.nn.leaky_relu(tf.matmul(self.X, w) + b)
             layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
-            layer = tf.nn.dropout(layer, self.fcl_keep_prob)
             self._layers.append(layer)
             
         for i in range(len(self.layer_nodes)):
             if i > 0:
                 with tf.variable_scope('layer_%d' %(i)):
-                    layer = tf.contrib.layers.fully_connected(self._layers[i-1], self.layer_nodes[i])
+            
+                    b = tf.get_variable(name = 'biases', shape = [self.layer_nodes[i]],
+                                        initializer = tf.contrib.layers.xavier_initializer())
+                    
+                    w = tf.get_variable(name = 'weights', shape  = [self.layer_nodes[i-1], self.layer_nodes[i]],
+                                        initializer = tf.contrib.layers.xavier_initializer())
+                    w = tf.nn.dropout(w, self.dropconnect_keep_prob) * self.dropconnect_keep_prob
+                    
+                    layer = tf.nn.leaky_relu(tf.matmul(self._layers[i-1], w) + b)
                     layer = tf.contrib.layers.batch_norm(layer, is_training = self.is_training)
                     self._layers.append(layer)
 
@@ -183,7 +190,6 @@ class FNN_BN_R(RestoreableComponent):
             tf.summary.histogram(name = 'predictions',values =  self.predictions)
             tf.summary.scalar(name = 'MSE', tensor = self.MSE)
             tf.summary.scalar(name = 'MISG', tensor = self.MISG)
-            tf.summary.scalar(name = 'MQE', tensor = self.MQE)
             tf.summary.scalar(name = 'PWT', tensor = self.PWT)
             tf.summary.image('prediction_vs_actual', epoch_image)
             self.summary = tf.summary.merge_all()
@@ -193,16 +199,10 @@ class FNN_BN_R(RestoreableComponent):
             with tf.variable_scope('train'):
                 self._msg += '.'; self._vprint(self._msg)
             
-                if self.cost == 'MSE':
+                if self.cost_name == 'MSE':
                     cost = self.MSE
-                if self.cost == 'MQE':
-                    cost = tf.log(self.MQE)
-                if self.cost == 'MISG':
+                if self.cost_name == 'MISG':
                     cost = self.MISG
-                if self.cost == 'PWT_weighted_MSE':
-                    cost = self.MSE * (100. - self.PWT)
-                if self.cost == 'PWT_weighted_MISG':
-                    cost = self.MISG * (100. - self.PWT)
 
 
                 self.optimizer = tf.train.AdamOptimizer(self.adam_initial_learning_rate, epsilon=1e-08).minimize(cost)

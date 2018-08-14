@@ -1,7 +1,6 @@
 # CNN_R_Trainer
 
 import sys, os
-sys.path.insert(1, os.path.join(sys.path[0], '../modules'))
 from NN_Trainer import NN_Trainer
 
 import tensorflow as tf
