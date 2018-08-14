@@ -49,7 +49,7 @@ class _DelayPredict(object):
     """_DelayPredict
     
     Base class for predictions.
-
+    
     Data processing and predictions.
     
     """
@@ -58,8 +58,10 @@ class _DelayPredict(object):
         """__init__
         
         Constants:
-
             _n_freqs = 1024
+        
+        Args:
+            data (list of complex floats): Visibliity data
         """
         self._data = data
         self._n_freqs = 1024
@@ -67,14 +69,14 @@ class _DelayPredict(object):
 
     def _angle_tx(self, x):
         """_angle_tx
-
+        
         Scales (-pi, pi) to (0, 1)
         
         Args:
             x (numpy array of floats): Angle data in range -pi to pi
         
         Returns:
-            array: Description
+            numpy array of floats: scaled angle data
         """
 
         return (x + np.pi) / (2. * np.pi)
@@ -82,21 +84,21 @@ class _DelayPredict(object):
 
     def _preprocess_data(self):
         """_preprocess_data
-
+        
             Converts data from complex to real (angle), scales, and reshapes
         
         Returns:
-            TYPE: Description
+            numpy array of floats: Scaled and reshaped angle data
         """
         return self._angle_tx(np.angle(self._data)).reshape(-1,1,self._n_freqs,1)
 
 
     def _predict(self):
         """_predict
-
+        
         Import frozen tensorflow network, activate graph, 
         feed data, and make prediction.
-
+        
         """
 
         resource_package = __name__ 
@@ -149,7 +151,7 @@ class VratioDelaySign(_DelayPredict):
 
     def __init__(self, data):
         """__init__
-
+        
         Preprocesses data for prediction.
         
             - converts complex data to angle
@@ -174,7 +176,7 @@ class VratioDelaySign(_DelayPredict):
             Convert index of predicted class index to value
               1 if class is postive
              -1 if class is negative
-
+        
         Returns:
             list of ints: 
         """
@@ -197,7 +199,7 @@ class VratioDelaySign(_DelayPredict):
 
 def _default_conversion_fn(x):
     """_default_conversion_fn
-
+    
     Convert unitless predictions to nanoseconds
     Based on 1024 channels and 
     0.100 GHz - 0.200 GHz range
@@ -225,7 +227,7 @@ class VratioDelayMagnitude(_DelayPredict):
     Methods:
         predict()
             - call to make prediction
-        
+    
     Attributes:
         data (list of complex floats): Visibility ratios
         predictions (numpy array of floats): The converted raw magnitude predictions (see predict())
@@ -252,8 +254,8 @@ class VratioDelayMagnitude(_DelayPredict):
 
 
     def _pred_cls_to_magnitude(self):
-        """Summary
-
+        """_pred_cls_to_magnitude
+        
         Convert predicted label index to magnitude
         
         Returns:
@@ -267,8 +269,7 @@ class VratioDelayMagnitude(_DelayPredict):
         """predict
         
         Args:
-            conversion_fn (None, str, or function):
-                - None - Do no conversion, output predictions are the raw predictions
+            conversion_fn (None, str, or function): - None - Do no conversion, output predictions are the raw predictions
                 - 'default' - convert raw predictions to ns by using frequencies 
                     with a 100MHz range over 1024 channels
                 - OR provide your own function to do the conversion
@@ -305,7 +306,7 @@ class VratioDelay(object):
         predict()
             - call to make prediction
     
-    Arrtributes:
+    Attributes:
         raw_predictions (list of floats): The raw predictions from the network
         predictions (numpy array of floats or list of floats) = The converted raw predictions
 
@@ -313,7 +314,7 @@ class VratioDelay(object):
     
     def __init__(self, data):
         """__init__
-
+        
         Preprocesses data for prediction.
         
             - converts complex data to angle
@@ -333,7 +334,7 @@ class VratioDelay(object):
 
     def predict(self, conversion_fn='default'):
         """predict
-
+        
             Make predictions
         
         Args:
@@ -344,8 +345,6 @@ class VratioDelay(object):
                     with a 100MHz range over 1024 channels
                 - OR provide your own function to do the conversion
                     - takes in one argument, the raw predictions
-        
-        
         
         Returns:
             numpy array of floats or list of floats: Predicted values
@@ -368,10 +367,10 @@ class DelaySolver(object):
             each length 2 sublist is made of two redundant separations, one in each tuple
     
         v_ratios (list of complex floats): shape = (N, 60, 1024)
-
+    
             Complex visibility ratios made from the the corresponding redundant sep pairs in list_o_sep_pairs
     
-        true_ant_delays (dict ): dict of delays with antennas as keys,
+        true_ant_delays (dict): dict of delays with antennas as keys,
             ex : true_ant_delays[143] = 1.2
             if conversion_fn == 'default', ant delays should be in ns
     
@@ -413,15 +412,19 @@ class DelaySolver(object):
         self.v_ratio_row_predictions_raw = self._predictor.raw_predictions
         
 
-
-        
-
-        
-        
-
     def _get_A_row(self, sep_pair):
+        """_get_A_row
+
+        constructs a single row of A from a sep pair
+
+        Args:
+            sep_pair (tuple of ints): Antennas for this visibility
+
+        Returns;
+            list of ints: a row of A
+    
+        """
         
-        # sep_pair like [(1,2), (2,3)]
         a = np.array(list(sum(sep_pair, ())))
 
         # construct the row
@@ -445,12 +448,16 @@ class DelaySolver(object):
 
 
     def _make_A_from_list_o_sep_pairs(self):
+        """_make_A_from_list_o_sep_pairs
+
+        Construct A row by row
+        """
 
         self.A = []
         for sep_pair in self._list_o_sep_pairs:
 
             # each visibility ratio of height 60 has one sep_pair
-            # so make 60 rows for each
+            # so make 60 idential rows in A for each visibility
             # so that A is the correct shape
             # (because the prediction will output a unique prediction 
             # for each row in the visibility ratio)
@@ -460,6 +467,14 @@ class DelaySolver(object):
 
 
     def true_b(self):
+        """ true_b
+
+        do A times x to find the true values for each visibility
+        where x is a list of the true antenna delays in order of antenna
+
+        Returns:
+            numpy array of floats
+        """
 
         
         self.x = [self._true_ant_delays[ant] for ant in self.unique_ants]
