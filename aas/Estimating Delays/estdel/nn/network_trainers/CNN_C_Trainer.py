@@ -1,3 +1,5 @@
+"""Summary
+"""
 # CNN_C_Trainer
 
 import sys, os
@@ -17,17 +19,18 @@ import itertools
 np.seterr(divide='ignore', invalid='ignore') # for cm div/zero (handled)
 
 class CNN_C_Trainer(NN_Trainer):
-    """ CNN_C_Trainer - Child of NN_Trainer
-            - for training classifcation networks
-            - see ????.ipynb for discussion
+    """CNN_C_Trainer
+        - for training classifcation networks
+        - see ????.ipynb for discussion
+        
+    Args:
+        - sample_keep_prob - Probability of keeping a value from an input row
+        - conv_keep_prob - Probability of keeping an output value from a convolution
+        - num_classes - int - Number of classification classes
+            - make sure this matches the value from the network
+            - why isnt this number just loaded from the network...
+        - single_dataset - bool - train on a single fixed dataset
 
-        Args:
-            - sample_keep_prob - Probability of keeping a value from an input row
-            - conv_keep_prob - Probability of keeping an output value from a convolution
-            - num_classes - int - Number of classification classes
-                - make sure this matches the value from the network
-                - why isnt this number just loaded from the network...
-            - single_dataset - bool - train on a single fixed dataset
     """
     __doc__ += NN_Trainer.__doc__
 
@@ -45,7 +48,7 @@ class CNN_C_Trainer(NN_Trainer):
                  conv_keep_prob = 0.9,
                  verbose = True,
                  single_dataset = False):
-    
+        """__init__"""
         NN_Trainer.__init__(self,
                             network = network,
                             Data_Creator = Data_Creator,

@@ -1,3 +1,5 @@
+"""Summary
+"""
 # CNN_DS_BN_C
 
 import sys, os
@@ -8,71 +10,90 @@ import tensorflow as tf
 import numpy as np
 
 class CNN_DS_BN_C(RestoreableComponent):
-    """ CNN_DS_BN_C() - Child of RestoreableComponent
-
-        CNN: Convolutional Neural Network.
-        DS: DownSampling. Each layer ends with a downsampling convolution
-        BN: All non-linearalities have batch-normalization applied.
-        C: Classification, this network classifies samples as having one of many labels.
-
-        Network Structure:
-
-            Incoming sample has dropout sample_keep_prob - set with Trainer
- 
-            Each layer has 4 convolutions, each with 4**(i+1) filters (i = zero based layer index).
-                - Each convolution:
-                    - is a 1D convolution
-                    - feeds into the next
-                    - has a filter of size (1, fw)
-                    - has biases and a LeakyReLU activation
-                    - has dropout with conv_keep_prob - set with Trainer
-                    - has batch normalization
-                - Filter widths (fw) of the four convolutions are [3,5,7,9]
-                TODO: Optional filter widths? (different per layer?)
-                - Fourth convolution will do 50% downsample (horizontal stride = 2)
-                
-            Final convolution feeds into fully connected layer as logits
-            Cost function softmax_cross_entropy_with_logits_v2
-            Optimizer is Adam with adam_initial_learning_rate
-            Predictions are softmax probabilites
-        
-        Args:
-            name (string)   - The name of the network. Used as name of log subdir
-            num_downsamples (int)   - The number of downsample convolutions 
-                                    - The number of layers
-            num_classes (int)   - The number of classification labels
-                                - Must be one of : 9, 81, 161, 401
-            log_dir (string)   - Parent directory of network parameter storage
-                            - On create_graph() network parameters are stored here
-            dtype (class)   - Datatype for network. tf.float16 will change Adam epsilon from 1e-8 to 1e-4
-            adam_initial_learning_rate (float)  -   Adam optimizer initial learning rate
-                                                -   Will decay over time as per Adam docs.
-            verbose (bool)  - Be verbose.
-
-        Usage :
-            - create object and set args (or load params)
-
-            Training :
-                - pass object into appropriate network Trainer object
-                - trainer will run create_graph()
-
-            Structure Check:
-                - run create_graph()
-                - call network._layers to see layer output dimensions
-                TODO: Make structure check better
-                    - should directly access _layers
-                    - should add save graph for tensorboard ?
-
-            Other:
-                - run create_graph()
-                - start tensorflow session
-
-        Methods:
-            - create_graph() - Contructs the network graph
-
-        Parent:
-
-       """
+    """CNN_DS_BN_C() - Child of RestoreableComponent
+    
+    CNN: Convolutional Neural Network.
+    DS: DownSampling. Each layer ends with a downsampling convolution
+    BN: All non-linearalities have batch-normalization applied.
+    C: Classification, this network classifies samples as having one of many labels.
+    
+    Network Structure:
+        Incoming sample has dropout sample_keep_prob - set with Trainer
+    
+        Each layer has 4 convolutions, each with 4**(i+1) filters (i = zero based layer index).
+            - Each convolution:
+                - is a 1D convolution
+                - feeds into the next
+                - has a filter of size (1, fw)
+                - has biases and a LeakyReLU activation
+                - has dropout with conv_keep_prob - set with Trainer
+                - has batch normalization
+            - Filter widths (fw) of the four convolutions are [3,5,7,9]
+            TODO: Optional filter widths? (different per layer?)
+            - Fourth convolution will do 50% downsample (horizontal stride = 2)
+    
+        Final convolution feeds into fully connected layer as logits
+        Cost function softmax_cross_entropy_with_logits_v2
+        Optimizer is Adam with adam_initial_learning_rate
+        Predictions are softmax probabilites
+    
+    Args:
+        name (string): The name of the network. Used as name of log subdir
+        num_downsamples (int): The number of downsample convolutions 
+                                - The number of layers
+        num_classes (int): The number of classification labels
+                            - Must be one of : 9, 81, 161, 401
+        log_dir (string): Parent directory of network parameter storage
+                        - On create_graph() network parameters are stored here
+        dtype (class): Datatype for network. tf.float16 will change Adam epsilon from 1e-8 to 1e-4
+        adam_initial_learning_rate (float): Adam optimizer initial learning rate
+                                            -   Will decay over time as per Adam docs.
+        verbose (bool): Be verbose.
+    
+    Usage:
+        - create object and set args (or load params)
+    
+        Training :
+            - pass object into appropriate network Trainer object
+            - trainer will run create_graph()
+    
+        Structure Check:
+            - run create_graph()
+            - call network._layers to see layer output dimensions
+            TODO: Make structure check better
+                - should directly access _layers
+                - should add save graph for tensorboard ?
+    
+        Other:
+            - run create_graph()
+            - start tensorflow session
+    
+    Methods:
+        - create_graph() - Contructs the network graph
+    
+    Parent:
+    
+    Attributes:
+        accuracy (tensorflow object): Running accuracy of predictions
+        adam_initial_learning_rate (tensorflow object): Adam optimizer initial learning rate
+        conv_keep_prob (tensorflow object): Keep prob rate for convolutions
+        correct_prediction (tensorflow object): compares predicted label to true, for predictions
+        cost (tensorflow object): cost function
+        dtype (tensorflow object): Type used for all computations
+        image_buf (tensorflow object): buffer for image summaries for tensorboard
+        is_training (tensorflow object): flag for batch normalization
+        labels (tensorflow object): tensor of sample labels
+        num_classes (int): Number of different classes
+        num_downsamples (int): Number of downsample convolutions
+        optimizer (tensorflow object): optimization function
+        pred_cls (tensorflow object): predicted class index
+        predictions (tensorflow object): probability predictions or each class
+        sample_keep_prob (tensorflow object): keep rate for incoming sample
+        summary (tensorflow object): summary operation for tensorboard
+        true_cls (tensorflow object): true class index
+        X (tensorflow object): incoming sample
+    
+    """
     __doc__ += RestoreableComponent.__doc__
 
     def __init__(self,
@@ -83,7 +104,17 @@ class CNN_DS_BN_C(RestoreableComponent):
                  dtype = tf.float32,
                  adam_initial_learning_rate = 0.0001,
                  verbose = True):
-    
+        """__init__
+        
+        Args:
+            name (str): Name of this network
+            num_downsamples (int): Number of downsample convolutions
+            num_classes (int): Number of different classes
+            log_dir (str, optional): Log directory
+            dtype (tensorboard datatype, optional): datatype for all operations
+            adam_initial_learning_rate (float, optional): Adam optimizer initial learning rate
+            verbose (bool, optional): be verbose
+        """
         RestoreableComponent.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.num_downsamples = num_downsamples
@@ -94,7 +125,10 @@ class CNN_DS_BN_C(RestoreableComponent):
         self.num_classes = num_classes #  classifier...
 
     def create_graph(self):
-        """ Create the network graph for use in a tensorflow session"""
+        """create_graph
+
+        Create the network graph for use in a tensorflow session
+        """
 
         
         self._msg = '\rcreating network graph '; self._vprint(self._msg)

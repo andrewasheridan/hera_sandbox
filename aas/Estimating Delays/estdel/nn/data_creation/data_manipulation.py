@@ -14,7 +14,7 @@ def load_relevant_data(miriad_path, calfits_path):
     """Loads redundant baselines, gains, and data.
     
     Arguments:
-        miriad_path (str ): path to a miriad file for some JD
+        miriad_path (str): path to a miriad file for some JD
         calfits_path (str): path to a calfits file for the same JD
     
     Returns:
@@ -107,7 +107,7 @@ def get_good_red_bls(red_bls, gain_keys, min_group_len = 4):
 def _train_test_split_red_bls(red_bls, training_percent = 0.80):
     """_train_test_split_red_bls
 
-    Slit a list of redundant baselines into a training set and a testing set. 
+    Split a list of redundant baselines into a training set and a testing set. 
     
     Each of the two sets has at least one pair of baselines from every group from red_bls.
     However, separations from one set will not appear the other.
@@ -159,18 +159,17 @@ def _train_test_split_red_bls(red_bls, training_percent = 0.80):
     thinned_dict_keys = thinned_groups_dict.keys()
     random.shuffle(thinned_dict_keys)
     
-    """Because we are ensuring that each set has some seps from every group,
-       the ratio of train / test gets reduced a few percent.
-       This (sort of) accounts for that with an arbitrary shift found by trial and error.
-       
-       Without this the a setting of training_percent = 0.80 results in a 65/35 split, not 80/20.
-       
-       I assume there is a better way..."""
+    # Because we are ensuring that each set has some seps from every group,
+    # the ratio of train / test gets reduced a few percent.
+    # This (sort of) accounts for that with an arbitrary shift found by trial and error.
+    #    
+    #    Without this the a setting of training_percent = 0.80 results in a 65/35 split, not 80/20.
+    #    
+    #    I assume there is a better way...
     t_pct = np.min([0.95, training_percent + 0.15])
 
     
-    # why did i call this extra?
-    # these are the keys that each set will extract seps from thinned_groups_dict with
+    # these 'extra' keys are the keys that each set will extract seps from thinned_groups_dict with
     training_red_bls_extra, testing_red_bls_extra = np.split(thinned_dict_keys,
                                                              [int(len(thinned_dict_keys)*t_pct)])
 

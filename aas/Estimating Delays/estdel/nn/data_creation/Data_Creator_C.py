@@ -1,3 +1,5 @@
+"""Summary
+"""
 # Data_Creator_C
 
 from data_manipulation import *
@@ -6,62 +8,87 @@ from Data_Creator import Data_Creator
 import numpy as np
 
 class Data_Creator_C(Data_Creator):
-    """ Data_Creator_C - Child of Data_Creator
-        C = Classification
-
-        Creates one dimensional inputs and their labels for training
-        Inputs are simulated angle data generated with true data as their base
-            - see ????.ipynb for discussion of input data
-        Labels are one-hot vectors (optionally blurred vectors)
-            - see ????.ipynb for discussion of labels and blurring
-
-        Each input is generated:
-            - a pair of redundant baselines is randomly chosen
-            - the ratio of visibilties is constructed (a complex flatness, see discussion)
-            - a separate target cable delay is applied to each row of the flatness
-                - targets in the range (-abs_min_max_delay, abs_min_max_delay)
-            - the angle is computed of the flatness with the applied delay
-
-        Each label is generated:
-            - the smooth range of targets is converted to a series of steps of the desired precision
-                - see Classifier_Class_Explanation.ipynb for discussion
-            - each unique step value is assigned a one-hot vector (from min to max)
-            - each target is assigned its label target
-            - if blur != 0 blur is applied
-                - Imagine each one-hot vector as a delta function with area = 1
-                - blur converts the delta function into a gaussian with area = 1
-                - see ????.ipynb for discussion
-
-        Args:
-            num_flatnesses : int - number of flatnesses used to generate data.
-                                   Number of data samples = 60 * num_flatnesses
-            bl_data : data source. Output of get_seps_data()
-            bl_dict : dict - Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
-            gains : dict - Gains for this data. An output of load_relevant_data()
-            abs_min_max_delay : float - targets are generated in range(-abs_min_max_delay, abs_min_max_delay)
-            precision : float - size of the class steps must be from (0.005,0.001,0.0005,0.00025,0.0001)
-            evaluation - bool - changes return for network evaluation (experimental)
-            single_dataset - bool - 
-            singleset_path - string
-            blur - float - blur value. Convert a one-hot vector delta function to a gaussian.
-                Spreads the 1.0 prob of a class over a range of nearby classes.
-                blur = 0.5 spreads over about 7 classes with a peak prob of 0.5 (varies)
-                blue = 0.1 spreads over about 40 classes with peak prob ~ 0.06 (varies)
+    """Data_Creator_C C = Classification
+    
+    Creates one dimensional inputs and their labels for training
+    Inputs are simulated angle data generated with true data as their base
+        - see ????.ipynb for discussion of input data
+    Labels are one-hot vectors (optionally blurred vectors)
+        - see ????.ipynb for discussion of labels and blurring
+    
+    Each input is generated:
+        - a pair of redundant baselines is randomly chosen
+        - the ratio of visibilties is constructed (a complex flatness, see discussion)
+        - a separate target cable delay is applied to each row of the flatness
+            - targets in the range (-abs_min_max_delay, abs_min_max_delay)
+        - the angle is computed of the flatness with the applied delay
+    
+    Each label is generated:
+        - the smooth range of targets is converted to a series of steps of the desired precision
+            - see Classifier_Class_Explanation.ipynb for discussion
+        - each unique step value is assigned a one-hot vector (from min to max)
+        - each target is assigned its label target
+        - if blur != 0 blur is applied
+            - Imagine each one-hot vector as a delta function with area = 1
+            - blur converts the delta function into a gaussian with area = 1
+            - see ????.ipynb for discussion
+    
+    Args:
+        num_flatnesses (int): number of flatnesses used to generate data.
+            Number of data samples = 60 * num_flatnesses
+        bl_data (dict): data source. Output of get_seps_data()
+        bl_dict (dict): Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
+        gains (dict): Gains for this data. An output of load_relevant_data()
+        abs_min_max_delay (float, optional): targets are generated in range(-abs_min_max_delay, abs_min_max_delay)
+        precision (float, optional): size of the class steps must be from (0.005,0.001,0.0005,0.00025,0.0001)
+        evaluation (bool, optional): experimental
+        single_dataset (bool, optional): experimental
+        singleset_path (None, optional): experimental
+        blur (float, optional): blur value. Convert a one-hot vector delta function to a gaussian.
+            Spreads the 1.0 prob of a class over a range of nearby classes.
+            blur = 0.5 spreads over about 7 classes with a peak prob of 0.5 (varies)
+            blue = 0.1 spreads over about 40 classes with peak prob ~ 0.06 (varies)
+            blur = 0.0, no blur
+    
+    Attributes:
+        blur (float): Description
+        evaluation (bool): experimental
+        precision (float): Description
+        single_dataset (bool): experimental
+        singleset_path (bool): experimental
     """
     __doc__ += Data_Creator.__doc__
 
     def __init__(self,
                  num_flatnesses,
-                 bl_data = None,
-                 bl_dict = None,
-                 gains = None,
+                 bl_data,
+                 bl_dict ,
+                 gains,
                  abs_min_max_delay = 0.040,
                  precision = 0.00025,
                  evaluation = False,
                  single_dataset = False,
                  singleset_path = None,
-                 blur = 0): # try 1, 0.5, 0.10
-
+                 blur = 0.): # try 1, 0.5, 0.10
+        """Summary
+        
+        Args:
+            num_flatnesses (int): number of flatnesses used to generate data.
+                Number of data samples = 60 * num_flatnesses
+            bl_data (dict): data source. Output of get_seps_data()
+            bl_dict (dict): Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
+            gains (dict): Gains for this data. An output of load_relevant_data()
+            abs_min_max_delay (float, optional): targets are generated in range(-abs_min_max_delay, abs_min_max_delay)
+            precision (float, optional): size of the class steps must be from (0.005,0.001,0.0005,0.00025,0.0001)
+            evaluation (bool, optional): experimental
+            single_dataset (bool, optional): experimental
+            singleset_path (None, optional): experimental
+            blur (float, optional): blur value. Convert a one-hot vector delta function to a gaussian.
+                Spreads the 1.0 prob of a class over a range of nearby classes.
+                blur = 0.5 spreads over about 7 classes with a peak prob of 0.5 (varies)
+                blue = 0.1 spreads over about 40 classes with peak prob ~ 0.06 (varies)
+                blur = 0.0, no blur
+        """
         Data_Creator.__init__(self,
                               num_flatnesses = num_flatnesses,
                               bl_data = bl_data,
@@ -76,8 +103,19 @@ class Data_Creator_C(Data_Creator):
         self.blur = blur
         
     def _load_singleset(self):
-        """load a set of specific baseline-pairs"""
+        """_load_singleset
+
+        load a set of specific baseline-pairs
+        """
         def loadnpz(filename):
+            """loadnpz
+            
+            Args:
+                filename (str): path
+            
+            Returns:
+                numpy array: loaded npz
+            """
             a = np.load(filename)
             d = dict(zip(("data1{}".format(k) for k in a), (a[k] for k in a)))
             return d['data1arr_0']
@@ -85,10 +123,19 @@ class Data_Creator_C(Data_Creator):
         return [[(s[0][0],s[0][1]), (s[1][0],s[1][1])] for s in loadnpz(self.singleset_path)]
     
     def _blur(self, labels):
-        """Convert a one-hot vector delta function to a gaussian.
-           Spreads the 1.0 prob of a class over a range of nearby classes.
-           blur = 0.5 spreads over about 7 classes with a peak prob of 0.5
-           blue = 0.1 spreads over about 40 classes with peak prob ~ 0.06"""
+        """_blur
+
+        Convert a one-hot vector delta function to a gaussian.
+        Spreads the 1.0 prob of a class over a range of nearby classes.
+        blur = 0.5 spreads over about 7 classes with a peak prob of 0.5
+        blur = 0.1 spreads over about 40 classes with peak prob ~ 0.06
+        
+        Args:
+            labels (list of lists of ints): class labels
+        
+        Returns:
+            list of lists of floats: class labels, blurred
+        """
         for i, label in enumerate(labels):
             true_val = np.argmax(label)
             mean = true_val; std = self.blur; variance = std**2
@@ -98,7 +145,14 @@ class Data_Creator_C(Data_Creator):
         return labels
              
     def _gen_data(self):            
-        
+        """_gen_data
+
+        Generates artiicial flatnesses by combining two redundant visbilites and their gains.
+        Applies different known delay to each row of the floatnesses.
+        Scales data for network.
+
+        Converts numerical delay valyue to classification label
+        """
         # scaling tools
         # the NN likes data in the range (0,1)
         angle_tx  = lambda x: (np.asarray(x) + np.pi) / (2. * np.pi)
@@ -124,7 +178,16 @@ class Data_Creator_C(Data_Creator):
 
 
         def _flatness(seps):
-            """Create a flatness from a given pair of seperations, their data & their gains."""
+            """_flatness
+
+            Create a flatness from a given pair of seperations, their data & their gains.
+            
+            Args:
+                seps (list of tuples of ints): two redundant separations 
+            
+            Returns:
+                numpy array of complex floats: visibility ratio flatnesss
+            """
 
             a, b = seps[0][0], seps[0][1]
             c, d = seps[1][0], seps[1][1]

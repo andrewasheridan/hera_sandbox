@@ -9,10 +9,10 @@ from data_manipulation import *
 import numpy as np
 
 class Data_Creator(object):
-    """Data_Creator - Parent for network-style specific creators
+    """Data_Creator - Parent for network style-specific creators
 
         Generates data, in an alternate thread, for training.
-        Child MUST override _gen_data()
+        Child MUST implement _gen_data()
     
         Args:
             num_flatnesses(int): number of flatnesses used to generate data.
@@ -21,28 +21,22 @@ class Data_Creator(object):
             bl_dict (dict) - Dictionary of seps with bls as keys. An output of get_or_gen_test_train_red_bls_dicts()
             gains(dict): - Gains for this data. An output of load_relevant_data()
     
-    ## usage:
-    ## data_maker = Data_Creator_R(num_flatnesses=250, mode = 'train')
-    ## data_maker.gen_data() #before loop
-    ## inputs, targets = data_maker.get_data() #start of loop
-    ## data_maker.gen_data() #immediately after get_data()
-    
     """
 
     def __init__(self,
                  num_flatnesses,
-                 bl_data = None,
-                 bl_dict = None,
-                 gains = None,
+                 bl_data,
+                 bl_dict,
+                 gains,
                  abs_min_max_delay = 0.040):     
         """__init__
         
         Args:
             num_flatnesses (int): Number of flatnesses to generate
-            bl_data (None, optional): Description
-            bl_dict (None, optional): Description
-            gains (None, optional): Description
-            abs_min_max_delay (float, optional): Description
+            bl_data (dict): keys are baselines, data is complex visibilities
+            bl_dict (dict): keys are unique redundant baseline, values are baselines in that redudany group
+            gains (dict): complex antenna gains
+            abs_min_max_delay (float, optional): MinMax value of delay
         """
         self._num = num_flatnesses
                     
@@ -59,26 +53,34 @@ class Data_Creator(object):
         self._tau = abs_min_max_delay
         
     def _gen_data(self):
-        """Summary
+        """_gen_data
+
+        This method is called in a separate thread via gen_data().
+        Must be overridden
         """
-        print('Must override _gen_data()')
+        print('Must implement _gen_data()')
  
     def gen_data(self):
-        """Starts a new thread and generates data there.
+        """gen_data
+
+        Starts a new thread and generates data there.
         """
         
         self._thread = Thread(target = self._gen_data, args=())
         self._thread.start()
 
     def get_data(self, timeout = 10):
-        """Retrieves the data from the thread.
+        """get_data
+
+        Retrieves the data from the thread.
+  
+        Args:
+            timeout (int, optional): data generation timeout in seconds
         
         Returns:
-            list of shape (num_flatnesses, 60, 1024)
+            (list of complex floats): shape = (num_flatnesses, 60, 1024)
              - needs to be reshaped for training
-        
-        Args:
-            timeout (int, optional): Description
+
         """
         
         if len(self._epoch_batch) == 0:
