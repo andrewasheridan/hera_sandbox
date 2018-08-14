@@ -12,7 +12,6 @@ from tensorflow.python.client import timeline
 import numpy as np
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
-import colorcet as cc
 import io
 import itertools
 
@@ -279,7 +278,7 @@ class CNN_C_Trainer(NN_Trainer):
 
         fig, ax = plt.subplots(figsize = (5,5), dpi = 320)
         #plt.figure(figsize=(15,10))
-        im = ax.imshow(cm, interpolation='nearest', aspect='auto', cmap=cc.m_linear_blue_95_50_c20, vmin = 0, vmax = 100)
+        im = ax.imshow(cm, interpolation='nearest', aspect='auto', cmap='Oranges', vmin = 0, vmax = 100)
         ax.set_title(title)
         cbar = fig.colorbar(im)
         if len(classes) <= 161:
