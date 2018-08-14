@@ -4,5 +4,8 @@
 
 ```
 numpy
-tensorflow # tested with 1.8.0
+matplotlib
+tensorflow
+pyuvdata
+hera_cal
 ``` 

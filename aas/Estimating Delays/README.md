@@ -13,12 +13,7 @@ matplotlib
 tensorflow
 pyuvdata
 hera_cal
-
-# for blue percepturally uniform colormap
-# see https://github.com/bokeh/colorcet
-colorcet (conda install -c bokeh colorcet)
-``` 
-
+```
 - and all their prereqs
 
 ## Data
