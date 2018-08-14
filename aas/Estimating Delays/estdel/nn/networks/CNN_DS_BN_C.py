@@ -37,19 +37,6 @@ class CNN_DS_BN_C(RestoreableComponent):
         Optimizer is Adam with adam_initial_learning_rate
         Predictions are softmax probabilites
     
-    Args:
-        name (string): The name of the network. Used as name of log subdir
-        num_downsamples (int): The number of downsample convolutions 
-                                - The number of layers
-        num_classes (int): The number of classification labels
-                            - Must be one of : 9, 81, 161, 401
-        log_dir (string): Parent directory of network parameter storage
-                        - On create_graph() network parameters are stored here
-        dtype (class): Datatype for network. tf.float16 will change Adam epsilon from 1e-8 to 1e-4
-        adam_initial_learning_rate (float): Adam optimizer initial learning rate
-                                            -   Will decay over time as per Adam docs.
-        verbose (bool): Be verbose.
-    
     Usage:
         - create object and set args (or load params)
     
@@ -70,28 +57,26 @@ class CNN_DS_BN_C(RestoreableComponent):
     
     Methods:
         - create_graph() - Contructs the network graph
-    
-    Parent:
-    
+        
     Attributes:
-        accuracy (tensorflow object): Running accuracy of predictions
-        adam_initial_learning_rate (tensorflow object): Adam optimizer initial learning rate
-        conv_keep_prob (tensorflow object): Keep prob rate for convolutions
-        correct_prediction (tensorflow object): compares predicted label to true, for predictions
-        cost (tensorflow object): cost function
-        dtype (tensorflow object): Type used for all computations
-        image_buf (tensorflow object): buffer for image summaries for tensorboard
-        is_training (tensorflow object): flag for batch normalization
-        labels (tensorflow object): tensor of sample labels
+        accuracy (tensorflow obj): Running accuracy of predictions
+        adam_initial_learning_rate (tensorflow obj): Adam optimizer initial learning rate
+        conv_keep_prob (tensorflow obj): Keep prob rate for convolutions
+        correct_prediction (tensorflow obj): compares predicted label to true, for predictions
+        cost (tensorflow obj): cost function
+        dtype (tensorflow obj): Type used for all computations
+        image_buf (tensorflow obj): buffer for image summaries for tensorboard
+        is_training (tensorflow obj): flag for batch normalization
+        labels (tensorflow obj): tensor of sample labels
         num_classes (int): Number of different classes
         num_downsamples (int): Number of downsample convolutions
-        optimizer (tensorflow object): optimization function
-        pred_cls (tensorflow object): predicted class index
-        predictions (tensorflow object): probability predictions or each class
-        sample_keep_prob (tensorflow object): keep rate for incoming sample
-        summary (tensorflow object): summary operation for tensorboard
-        true_cls (tensorflow object): true class index
-        X (tensorflow object): incoming sample
+        optimizer (tensorflow obj): optimization function
+        pred_cls (tensorflow obj): predicted class index
+        predictions (tensorflow obj): probability predictions or each class
+        sample_keep_prob (tensorflow obj): keep rate for incoming sample
+        summary (tensorflow obj): summary operation for tensorboard
+        true_cls (tensorflow obj): true class index
+        X (tensorflow obj): incoming sample
     
     """
     __doc__ += RestoreableComponent.__doc__

@@ -1,4 +1,5 @@
-# FNN_BN_R
+"""FNN_BN_R
+"""
 
 import sys, os
 
@@ -8,27 +9,35 @@ import tensorflow as tf
 import numpy as np
 
 class FNN_BN_R(RestoreableComponent):
-    """A neural network of fully connected layers.
+
+    """FNN_BN_R
+
+    A neural network of fully connected layers.
     
-    First layer has Leaky_ReLU activation. Other layers have ReLU activation.
-    Input sample has dropout at rate 1 - sample_keep_prob.
-
-    Args
-        layer_nodes - (list of ints) - Number of nodes in each fully connected layer.
-        cost - (string) - Name of the cost function
-            - MSE, MQE, MISG, PWT_weighted_MSE, or PWT_weighted_MISG
-            - MSE - mean squared error
-            - MQE - log of mean sqaure of squared error) - experimental
-            - MISG - mean inverse shifted gaussian
-            - PWT_weighted_MSE - (PWT - 100)*MSE - experimental
-            - PWT_weighted_MISG - (PWT - 100)*MISG - experimental
-        accuracy_threshold - (float) - the value for a target to be considered 'good'
-        gaussian_shift_scalar - (float) - scalar to shift the gaussian with
-            - also scales the value of MSE and MISG for no reason
-                - because i liked the numbers to be large
-        
+    Attributes:
+        accuracy_threshold (float): the value for a target to be considered 'good'
+        adam_initial_learning_rate (float): Adam optimizer initial learning rate
+        cost (str): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+            - use 'MSE', others experimental
+        dtype (tensorflow obj): type used for all computations
+        fcl_keep_prob (tensorflow obj): keep prob for fully connected layers
+        gaussian_shift_scalar (float): value to shift gaussian for 'MISG' cost
+        image_buf (tensorflow obj): buffer for image summaries for tensorboard
+        is_training (tensorflow obj): flag for batch normalization
+        layer_nodes (list of ints): numbers of nodes in each layer
+        MISG (tensorflow obj): cost function, experimental. Mean Inverse Shifted Gaussian 
+        MQE (tensorflow obj): cost function, experimental. Mean Quad Error
+        MSE (tensorflow obj): cost function. Mean Squared Error
+        optimizer (tensorflow obj): optimization function
+        predictions (tensorflow obj): predicted outputs
+        PWT (tensorflow obj): Percent of predictions within threshold
+        sample_keep_prob (tensorflow obj): keep prob for input samples
+        summary (tensorflow obj): summary operation for tensorboard
+        targets (tensorflow obj): true values for optimizer
+        X (tensorflow obj): input samples
     """
-
+    __doc__ += RestoreableComponent.__doc__
+    
     def __init__(self,
                  name,
                  layer_nodes,
@@ -39,7 +48,20 @@ class FNN_BN_R(RestoreableComponent):
                  accuracy_threshold = 0.00625,
                  gaussian_shift_scalar = 1e-5,
                  verbose = True):
-    
+        """__init__
+        
+        Args:
+            name (str): name of network
+            layer_nodes (list of ints): numbers of nodes in each layer
+            cost (str, optional): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+                    - use 'MSE', others experimental
+            log_dir (str, optional): Directory to store network model and params
+            dtype (tensorflow obj, optional): type used for all computations
+            adam_initial_learning_rate (float, optional): Adam optimizer initial learning rate
+            accuracy_threshold (float, optional): the value for a target to be considered 'good'
+            gaussian_shift_scalar (float, optional): value to shift gaussian for 'MISG' cost
+            verbose (bool, optional): Be verbose   
+        """
         RestoreableComponent.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.layer_nodes = layer_nodes
@@ -57,7 +79,10 @@ class FNN_BN_R(RestoreableComponent):
 
 
     def create_graph(self):
+        """create_graph
 
+        Create the network graph for use in a tensorflow session
+        """
         self.save_params()
         self._msg = '\rcreating network graph '; self._vprint(self._msg)
 

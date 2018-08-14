@@ -1,4 +1,5 @@
-# CNN_QP_BN_R
+"""CNN_QP_BN_R
+"""
 
 import sys, os
 
@@ -8,11 +9,39 @@ import tensorflow as tf
 import numpy as np
 
 class CNN_QP_BN_R(RestoreableComponent):
-    """CNN: Convolutional neural network.
-       QP: Each computational layer is a quad-path layer.
-       BN: All non-linearalities have batch-normalization applied.
-       R: Regression, this network predicts a single value for each input."""
+    """CNN_QP_BN_R
+    CNN: Convolutional neural network.
+   QP: Each computational layer is a quad-path layer.
+   BN: All non-linearalities have batch-normalization applied.
+   R: Regression, this network predicts a single value for each input.
+
     
+    Attributes:
+        accuracy (tensorflow obj): Running accuracy of predictions
+        adam_initial_learning_rate (float): Adam optimizer initial learning rate
+        conv_keep_prob (tensorflow obj): Keep prob rate for convolutions
+        cost (str): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+            - use 'MSE', others experimental
+        dtype (tensorflow obj): Type used for all computations
+        gaussian_shift_scalar (float): value to shift gaussian for 'MISG' cost
+        image_buf (tensorflow obj): buffer for image summaries for tensorboard
+        is_training (tensorflow obj): flag for batch normalization
+        layer_downsampling_factors (list of ints): factors to downsample each layer
+        MISG (tensorflow obj): cost function, experimental. Mean Inverse Shifted Gaussian 
+        MSE (tensorflow obj): cost function. Mean Squared Error
+        num_1x1_conv_filters_per_layer (list of ints): number of 1x1 convolutions for each layer
+        num_freq_channels (int): Number of frequency channels
+        optimizer (tensorflow obj): optimization function
+        pred_keep_prob (TYPE): prediction keep prob
+        predictions (tensorflow obj): predicted outputs
+        PWT (tensorflow obj): Percent of predictions within threshold
+        sample_keep_prob (tensorflow obj): keep prob for input samples
+        samples (TYPE): input samples
+        summary (tensorflow obj): summary operation for tensorboard
+        targets (tensorflow obj): true values for optimizer
+        wide_convolution_filter_widths (list of ints): widths of each laters wide convolutions
+    """
+    __doc__ += RestoreableComponent.__doc__
     def __init__(self,
                  name,
                  wide_convolution_filter_widths,
@@ -25,7 +54,22 @@ class CNN_QP_BN_R(RestoreableComponent):
                  accuracy_threshold = 0.00625,
                  gaussian_shift_scalar = 1e-5,
                  verbose = True):
-    
+        """__init__
+        
+        Args:
+            name (str): name of network
+            wide_convolution_filter_widths (list of ints): widths of each laters wide convolutions
+            layer_downsampling_factors (list of ints): factors to downsample each layer
+            num_1x1_conv_filters_per_layer (list of ints): number of 1x1 convolutions for each layer
+            log_dir (str, optional): directory to store network model and params
+            dtype (tensorflow obj): Type used for all computations
+            adam_initial_learning_rate (tensorflow obj): Adam optimizer initial learning rate
+            cost (str): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+                - use 'MSE', others experimental
+            accuracy_threshold (float, optional): Threshold to count a prediction as being on target
+            gaussian_shift_scalar (float): value to shift gaussian for 'MISG' cost
+            verbose (bool, optional): be verbose
+        """
         RestoreableComponent.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.wide_convolution_filter_widths = wide_convolution_filter_widths
@@ -41,7 +85,10 @@ class CNN_QP_BN_R(RestoreableComponent):
         self.num_freq_channels = 1024
         
     def create_graph(self):
-        
+        """create_graph
+
+        Create the network graph for use in a tensorflow session
+        """
         self.save_params()
         self._msg = '\rcreating network graph '; self._vprint(self._msg)
         
@@ -167,31 +214,25 @@ class CNN_QP_BN_R(RestoreableComponent):
 
 class Quad_Path_Layer(object):
     """A layer for a convolutional network. Layer is made of four paths: Average, Max, Wide, Narrow.
-
-        Average - Average pool followed by a 1x1 convolution.
-        Max - Max pool followed by a 1x1 convolution.
-        Wide - 1x1 convolution followed by 1xWide convoltuion.
-        Narrow - 1x1 convolution followed 1x(Wide/2) convolution.
-
-       Args:
-            
-            t - (tensor) - incoming sample or previous layers output
-            layer_name (string) - the scope name for this layer (for tensorboard)
-            wide_convolution_filter_width - (int) - width of the Wide paths convolution filters.
-                - (Narrow paths filters are set to wide_convolution_filter_width / 2)
-            num_1x1_conv_filters - (int) - Number of filters for all the 1x1 convolutions.
-                - (Number of narrow filters = num_1x1_conv_filters / 2)
-                - (Number of wide filters = num_1x1_conv_filters/2/2)
-            conv_keep_prob - (float) - Keep probability for convolutions
-            is_training - (bool) - Flag for training (for batch normalization)
-            dtype - (tf.float32) - Data dtype
-
-        Returns:
-
-            (tensor) - Concatenated filters of the four paths.
-
-
-       """
+    
+     Average - Average pool followed by a 1x1 convolution.
+     Max - Max pool followed by a 1x1 convolution.
+     Wide - 1x1 convolution followed by 1xWide convoltuion.
+     Narrow - 1x1 convolution followed 1x(Wide/2) convolution.
+    
+    
+    Attributes:
+        conv_keep_prob (float): keep prob for convolutions
+        dtype (tensorflow obj): type used for all computations
+        is_training (tensorflow obj): flag for batch normalization
+        layer_name (str): name of layer
+        num_1x1_conv_filters (int): Number of 1x1 convolution filters
+        strides (list of ints): stride for this layer
+        t (tensor): tensor to process
+        wide_convolution_filter_width (int): Width of the wide convolution filter
+    
+    
+    """
     
     def __init__(self,
                  t,
@@ -202,7 +243,18 @@ class Quad_Path_Layer(object):
                  conv_keep_prob = 0.90,
                  is_training = True,
                  dtype = tf.float32):
+        """Summary
         
+        Args:
+            t (tensor): tensor to process
+            layer_name (str): name of layer
+            wide_convolution_filter_width (int): Width of the wide convolution filter
+            layer_downsampling_factor (int): Factor to downsample by
+            num_1x1_conv_filters (int, optional): Number of 1x1 convolution filters
+            conv_keep_prob (float, optional): keep prob for convolutions
+            is_training (bool, optional): flag for batch normalization
+            dtype (tensorflow obj, optional): type used for all computations
+        """
         self.t = t
         self.layer_name = layer_name
         self.wide_convolution_filter_width = wide_convolution_filter_width
@@ -214,7 +266,13 @@ class Quad_Path_Layer(object):
 
         
     def process(self):
+        """process
 
+        Creates the quad path layer
+        
+        Returns:
+            tensor: concatenated filtes after processing
+        """
         with tf.variable_scope(self.layer_name):
 
             narrow_convolution_filter_width = self.wide_convolution_filter_width / 2
@@ -249,13 +307,34 @@ class Quad_Path_Layer(object):
         return t
 
     def _trainable(self, name, shape):
+        """_trainable
+
+        Wrapper for tensorflow.get_variable(), xavier initialized
+        
+        Args:
+            name (str): name of variable
+            shape (int or list of ints): shape for vairable
+        
+        Returns:
+            tensorflow obj: trainable variable
+        """
         return tf.get_variable(name = name,
                                dtype = self.dtype,
                                shape = shape,
                                initializer = tf.contrib.layers.xavier_initializer())
     
     def _bias_add_scope(self, t, shape):
-        """Creates a scope around a trainable bias and its addition to input"""
+        """_bias_add_scope
+
+        Creates a scope around a trainable bias and its addition to input
+        
+        Args:
+            t (tensor): tensor to add biases to
+            shape (int): number of biases to add
+        
+        Returns:
+            tensor: tensor with biases added to it
+        """
         with tf.variable_scope('add_bias'):
 
             biases = self._trainable('biases', shape)
@@ -265,7 +344,19 @@ class Quad_Path_Layer(object):
 
 
     def _conv_scope(self,t, filter_shape, strides, scope_name = 'convolution'):
-        """Creates a scope around a convolution."""
+        """_conv_scope
+
+        Creates a scope around a convolution layer.
+        t = dropout( batch_norm( relu( conv2d(t) + bias )))
+        Args:
+            t (tensor): tensor to process
+            filter_shape (list of ints): Shape of convolution filters
+            strides (list of ints): Convolution strides
+            scope_name (str, optional): name of scope (for graph organization)
+        
+        Returns:
+            tensor: processed tensor
+        """
         with tf.variable_scope(scope_name):
 
             t = tf.nn.conv2d(t, self._trainable('filters', filter_shape),strides,'SAME')
@@ -277,13 +368,29 @@ class Quad_Path_Layer(object):
         return t
     
     def _1x1_conv(self, t):
+        """_1x1_conv
+
+        1x1 convolution with strides = 1 and num_1x1_conv_filters filters
+        
+        Args:
+            t (tensor): tensor to convolve
+        
+        Returns:
+            tensor: convolved tensor
+        """
         return self._conv_scope(t,
                                 [1,1,t.get_shape().as_list()[3],self.num_1x1_conv_filters],
                                 [1,1,1,1],
                                 "1x1_conv")
 
     def _avg_scope(self):
-        """Creates a scope around the average-pool path."""
+        """_avg_scope
+
+        Creates a scope around the average-pool path.
+        
+        Returns:
+            tensor: tensor after average pool and 1x1 convolution
+        """
         with tf.variable_scope('average'):
             t = tf.nn.avg_pool(self.t, self.strides, self.strides, padding = "SAME")
             t = self._1x1_conv(t)
@@ -291,7 +398,13 @@ class Quad_Path_Layer(object):
         return t
 
     def _max_scope(self):
-        """Creates a scope around the max-pool path"""
+        """_max_scope
+
+        Creates a scope around the max-pool path
+        
+        Returns:
+            tensor: tensor after max pool and 1x1 convolution
+        """
         with tf.variable_scope('max'):
             t = tf.nn.max_pool(self.t, self.strides, self.strides, padding = "SAME")
             t = self._1x1_conv(t)
@@ -299,7 +412,16 @@ class Quad_Path_Layer(object):
         return t
 
     def _filter_cat_scope(self,t_list):
-        """Creates a scope around filter concatation (layer output)"""
+        """_filter_cat_scope
+
+        Creates a scope around filter concatation (layer output)
+        
+        Args:
+            t_list (list of tensors): filters to concatenate
+        
+        Returns:
+            tensor: concatenated tensors
+        """
         with tf.variable_scope('filter_cat'):
             t = tf.concat(t_list, 3)
         return t

@@ -1,4 +1,5 @@
-# CNN_DS_BN_R
+"""CNN_DS_BN_R
+"""
 
 import sys, os
 
@@ -8,23 +9,33 @@ import tensorflow as tf
 import numpy as np
 
 class CNN_DS_BN_R(RestoreableComponent):
-    """ CNN: Convolutional Neural Network.
-        DS: DownSampling. Each convolution is followed by a downsampling convolution
-        BN: All non-linearalities have batch-normalization applied.
-        R: Regression, this network takes in a sample and returns a value.
- 
-        Each layer starts with a 1x3 convolution with 2**i filters (i = layer index) with stride of 1.
-        This is fed into a 1x5 convolution with the same number of filters, but stride of 2 (50% downsample)
 
-        Leaky_ReLU and batch normalization is applied after each convolution. Downsamples convolutions have dropout.
-        Biases are added before activations.
-
-        Output of last layer is fed to fully connected layer with relu activation
-
-        Cost function is mean squared error
-
-       """
-
+    """CNN_DS_BN_R
+    
+    Attributes:
+        accuracy_threshold (float): the value for a target to be considered 'good'
+        adam_initial_learning_rate (float): Adam optimizer initial learning rate
+        cost (str): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+            - use 'MSE', others experimental
+        downsample_keep_prob (tensorflow obj): keep prob for downsampling layers
+        dtype (tensorflow obj): type used for all computations
+        gaussian_shift_scalar (float): value to shift gaussian for 'MISG' cost
+        image_buf (tensorflow obj): buffer for image summaries for tensorboard
+        is_training (tensorflow obj): flag for batch normalization
+        MISG (tensorflow obj): cost function, experimental. Mean Inverse Shifted Gaussian 
+        MQE (tensorflow obj): cost function, experimental. Mean Quad Error
+        MSE (tensorflow obj): cost function. Mean Squared Error
+        num_downsamples (int): Number of downsampling layers
+        optimizer (tensorflow obj): optimization function
+        predictions (tensorflow obj): predicted outputs
+        PWT (tensorflow obj): Percent of predictions within threshold
+        sample_keep_prob (tensorflow obj): keep prob for input samples
+        summary (tensorflow obj): summary operation for tensorboard
+        targets (tensorflow obj): true values for optimizer
+        X (tensorflow obj): input samples
+    """
+    __doc__ += RestoreableComponent.__doc__
+    
     def __init__(self,
                  name,
                  num_downsamples,
@@ -35,7 +46,20 @@ class CNN_DS_BN_R(RestoreableComponent):
                  accuracy_threshold = 0.00625,
                  gaussian_shift_scalar = 1e-5,
                  verbose = True):
-    
+        """Summary
+        
+        Args:
+            name (str): name of network
+            num_downsamples (int): number of downsampling layers
+            cost (str, optional): name of cost function. 'MSE', 'MQE', 'MISG', 'PWT_weighted_MSE', 'PWT_weighted_MISG'
+                    - use 'MSE', others experimental
+            log_dir (str, optional): Directory to store network model and params
+            dtype (tensorflow obj, optional): type used for all computations
+            adam_initial_learning_rate (float, optional): Adam optimizer initial learning rate
+            accuracy_threshold (float, optional): the value for a target to be considered 'good'
+            gaussian_shift_scalar (float, optional): value to shift gaussian for 'MISG' cost
+            verbose (bool, optional): Be verbose 
+        """
         RestoreableComponent.__init__(self, name=name, log_dir=log_dir, verbose=verbose)
                 
         self.num_downsamples = num_downsamples
@@ -53,7 +77,10 @@ class CNN_DS_BN_R(RestoreableComponent):
 
 
     def create_graph(self):
+        """create_graph
 
+        Create the network graph for use in a tensorflow session
+        """
         self.save_params()
         self._msg = '\rcreating network graph '; self._vprint(self._msg)
 

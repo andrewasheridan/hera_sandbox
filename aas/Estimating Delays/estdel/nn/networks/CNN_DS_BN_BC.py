@@ -24,7 +24,7 @@ class CNN_DS_BN_BC(CNN_DS_BN_C):
         Cost function is softmax cross entropy
 
        """
-
+       __doc__ += CNN_DS_BN_C.__doc__
     def __init__(self,
                  name,
                  num_downsamples,
