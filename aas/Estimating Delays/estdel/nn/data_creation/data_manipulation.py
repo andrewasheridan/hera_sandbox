@@ -227,8 +227,8 @@ def get_or_gen_test_train_red_bls_dicts(red_bls = None,
     Returns:
         dict, dict: training_red_bls_dict, testing_red_bls_dict
     """
-    training_fn = '../data/training_redundant_baselines_dict_{}'.format(int(100*training_percent))
-    testing_fn = '../data/testing_redundant_baselines_dict_{}'.format(int(100*training_percent))
+    training_fn = 'data/training_redundant_baselines_dict_{}'.format(int(100*training_percent))
+    testing_fn = 'data/testing_redundant_baselines_dict_{}'.format(int(100*training_percent))
 
     if training_load_path != None and testing_load_path != None:
         
