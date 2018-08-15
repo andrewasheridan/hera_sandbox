@@ -31,6 +31,7 @@ import pkg_resources
 import numpy as np
 import tensorflow as tf
 
+# suppress tensorflow INFO messages
 tf.logging.set_verbosity(tf.logging.WARN)
 
 _TRAINED_MODELS_DIR = 'trained_models'
@@ -41,7 +42,8 @@ _SIGN_PATH = 'sign_NN_frozen.pb'
 # fn for best magnitude classifier
 _MAG_PATH = 'mag_NN_frozen.pb'
 
-
+# number of frequency channels
+N_FREQS = 1024
 
 
 
@@ -64,7 +66,9 @@ class _DelayPredict(object):
             data (list of complex floats): Visibliity data
         """
         self._data = data
-        self._n_freqs = 1024
+        self._n_freqs = N_FREQS
+
+        assert(self._data.shape[-1] == self._n_freqs)
 
 
     def _angle_tx(self, x):
@@ -78,7 +82,7 @@ class _DelayPredict(object):
         Returns:
             numpy array of floats: scaled angle data
         """
-
+        
         return (x + np.pi) / (2. * np.pi)
     
 
@@ -211,7 +215,7 @@ def _default_conversion_fn(x):
         numpy array of floats: Converted predicted value
     """
     
-    freqs = np.linspace(0.100,0.200,1024) 
+    freqs = np.linspace(0.100,0.200,N_FREQS) 
     channel_width_in_GHz = np.mean(np.diff(freqs))
 
     return np.array(x) / channel_width_in_GHz
@@ -425,7 +429,7 @@ class DelaySolver(object):
     
         """
         
-        a = np.array(list(sum(sep_pair, ())))
+        a = np.array(list(sum(sep_pair, () ))) # [(1,2) , (3, 4)] -> [1, 2, 3, 4]
 
         # construct the row
         # https://stackoverflow.com/a/29831596
