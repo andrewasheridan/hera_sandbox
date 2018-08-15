@@ -1,0 +1,2 @@
+include estdel/trained_models/mag_NN_frozen.pb
+include estdel/trained_models/sign_NN_frozen.pb
