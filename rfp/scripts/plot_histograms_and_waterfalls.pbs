@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N rfi_plots
+#PBS -q hera
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=72:00:00
+#PBS -l vmem=160g
+#PBS -j oe
+#PBS -o /lustre/aoc/projects/hera/rpascua/logs/rfi_plots.out
+#PBS -m be
+#PBS -M r.pascua+nrao@berkeley.edu
+
+date
+source ~/.bashrc
+conda activate hera
+cd ~/hera_packages/hera_sandbox/rfp/scripts
+echo "python plot_histograms_and_waterfalls.py"
+python plot_histograms_and_waterfalls.py
+date

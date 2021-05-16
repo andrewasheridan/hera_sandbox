@@ -1,0 +1,45 @@
+#!/bin/bash
+#PBS -N narrowband_rfi
+#PBS -q hera
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=72:00:00
+#PBS -l vmem=128g
+#PBS -j oe
+#PBS -o /lustre/aoc/projects/hera/rpascua/logs/narrowband_rfi.out
+#PBS -m be
+#PBS -M r.pascua+nrao@berkeley.edu
+
+date
+source ~/.bashrc
+conda activate hera
+~/pull_autos.sh
+~/track_detrended_files.sh
+
+cd /lustre/aoc/projects/hera/rpascua/rfi/narrowband_data
+declare datadir=$(pwd)
+declare baddays=() # 2458768 2458769 )
+declare visfiles=()
+for f in $(ls ./245*); do
+    f=${f#*/}
+    if [[ ! " ${baddays[@]} " =~ ${f%%.*} ]]; then
+        # Only perform detrending and flagging on sum files.
+        if [[ "$f" == *"autos.sum"* ]]; then
+            visfiles+=($f)
+        fi
+    fi
+done
+echo ${visfiles[@]}
+declare saveto=/lustre/aoc/projects/hera/rpascua/rfi/narrowband_data
+
+cd /users/rpascua/hera_packages/hera_sandbox/rfp/scripts  
+for visfile in ${visfiles[@]}; do
+    # Only do files that have not already been flagged.
+    auto_file=${datadir}/${visfile}
+    if [[ ! -e ${auto_file/autos.sum/detrended.flagged} ]]; then
+        echo python run_narrowband_extraction.py ${auto_file} ${saveto}
+        python run_narrowband_extraction.py ${auto_file} ${saveto}
+        date
+    fi
+done
+~/track_detrended_files.sh
+date

@@ -92,6 +92,34 @@ def PAPER_32_all():
 
     PAPER_RESULTS_FILES = glob.glob(os.path.dirname(__file__)+'/data/psa32_apj/pspec_*.npz')
     PAPER_RESULTS_FILES.sort()
+    PAPER_RESULTS_FILES = [f for f in PAPER_RESULTS_FILES if '110_149' not in f]
+    freqs= []
+    for filename in PAPER_RESULTS_FILES:
+        try:
+            freqs.append(n.load(filename)['freq']*1e3)
+        except(KeyError):
+            try:
+                dchan = int(filename.split('/')[-1].split('.')[0].split('_')[2])-int(filename.split('/')[-1].split('.')[0].split('_')[1])
+                chan = int(filename.split('/')[-1].split('.')[0].split('_')[1]) + dchan/2.
+                freqs.append(chan/2. + 100) #a pretty good apprximation of chan 2 freq for 500kHz channels
+            except: continue
+    freqs = n.array(freqs)
+    zs = cosmo_units.f212z(freqs*1e6)
+    results = {}
+    for files,z in zip(PAPER_RESULTS_FILES,zs):
+        f=n.load(files)
+        results[z] = n.array([f['k'],f['k3pk'],f['k3pk']+f['k3err'],f['k3pk']-f['k3err']]).T
+    return results
+
+def PAPER_32_parsons():
+    '''
+    Results from  PAPER 32  Parsons et.al 2014
+
+    outputs results[z] = n.array([k, Delta^2, 2-sigma upper, 2-sigma lower])
+    '''
+
+    PAPER_RESULTS_FILES = glob.glob(os.path.dirname(__file__)+'/data/psa32_apj/pspec_110_149.npz')
+    PAPER_RESULTS_FILES.sort()
     freqs= []
     for filename in PAPER_RESULTS_FILES:
         try:
@@ -456,8 +484,9 @@ def load_pspecs(files,verbose=False):
         if verbose:
             print FILE.split('/')[-1], redshifts[i]
         k = F['k']
-        Delta2 = k**3/(2*np.pi**2) * F['pCv_fold']
-        Delta2_err = k**3/(2*np.pi**2) *F['pCv_fold_err']
+        Delta2 = k**3/(2*np.pi**2) * F['pIv_fold']
+        #Delta2 = np.zeros_like(Delta2)
+        Delta2_err = 2*k**3/(2*np.pi**2) *F['pIv_fold_err']
         data[redshifts[i]] = np.array([k,Delta2,
                                     Delta2+Delta2_err,
                                     Delta2-Delta2_err]).T
@@ -551,15 +580,20 @@ formats = {'GMRT_2014_all':
             dict(fmt='g*', uplims=True,
                 label='Beardsley, 2016'),
             'PAPER_32_all':
-            dict(fmt='d',color='purple',alpha=.3, uplims=True,
+            dict(fmt='d',color='purple', uplims=True,
                 label='Jacobs, 2015'),
+            'PAPER_32_parsons':
+            dict(fmt='d',color='cyan', uplims=True,
+                label='Parsons, 2014'),
             'PAPER_64_all':
-            dict(fmt='d',color='grey', alpha=.3,
+            dict(fmt='d',color='grey',
                  uplims=True,
                  label='Ali, 2015'),
             'LOFAR_Patil_2017':
             dict(fmt='bh',uplims=True,
                 label='Patil, 2017')
+            dict(fmt='0.5.',uplims=True,
+                label='Parsons 2015')
             }
 krange_table = {'GMRT_2014_all': dict(krange=[.1,.5]),
             'MWA_32T_all': dict(krange=None),
@@ -567,6 +601,8 @@ krange_table = {'GMRT_2014_all': dict(krange=[.1,.5]),
             'MWA_128_beardsley_2016_all':
             dict(krange=None),
             'PAPER_32_all':
+            dict(krange=[.1,.6]),
+            'PAPER_32_parsons':
             dict(krange=[.1,.6]),
             'PAPER_64_all':
             dict(krange=[.1,.6]),
@@ -609,14 +645,16 @@ def plot_lowest_limits(files=None,title='',published = None,
         for z in unpublished_data:
             print z,unpublished_data[z].shape
         min_data  = min_limit(unpublished_data,krange=krange)
-        redshifts = min_data.keys()
+        redshifts = sorted(min_data.keys())
+        for _z in redshifts:
+            print _z,min_data[_z][2], np.sqrt(min_data[_z][2])
         min_limits = np.array([min_data[z][2] for z in redshifts])
         ax.errorbar(redshifts,min_limits,min_limits/1.5,capsize=capsize,
             label=title,uplims=True,fmt='kd')
 
     ax.set_yscale('log')
     ax.set_ylabel('$\Delta^{2} (mK)^{2}$')
-    ax.set_ylim([1e0, 1e10])
+    ax.set_ylim([1e0, 1e9])
     ax.set_xlabel('z')
     ax.grid(axis='y')
     # Add model data.
@@ -647,7 +685,7 @@ def plot_lowest_limits(files=None,title='',published = None,
                     else:
                         label = "Fiducial 21cmFAST model"
                         ls = '-k'
-                        fig.text(.65, .35, label, fontsize=10)
+                        fig.text(.65, .36, label, fontsize=10)
                     ax.plot(parm_array[_slice,0],
                             delta2_array[_slice,k_index], ls)#,label=label)
                 #    ax.plot(parm_array[_slice, 0],
@@ -661,10 +699,10 @@ def plot_lowest_limits(files=None,title='',published = None,
     # this array split makes it so that all MWA is on one line of the 
     # figure caption it looks a little weird as code but it's a hack
     # for now to get it look pretty
-    handles = np.array_split(handles, 2)
-    labels = np.array_split(labels, 2)
-    handles = list(itertools.chain.from_iterable(itertools.izip_longest(*handles)))
-    labels = list(itertools.chain.from_iterable(itertools.izip_longest(*labels)))
+    #handles = np.array_split(handles, 2)
+    #labels = np.array_split(labels, 2)
+    #handles = list(itertools.chain.from_iterable(itertools.izip_longest(*handles)))
+    #labels = list(itertools.chain.from_iterable(itertools.izip_longest(*labels)))
     #handles.insert(num_hands, handles.pop(-1))
     #labels.insert(num_hands, labels.pop(-1))
     ymax=[np.max(np.abs(_da)) for lines in ax.get_lines() for _da in lines.get_ydata() ]

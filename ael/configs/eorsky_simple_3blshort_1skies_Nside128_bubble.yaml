@@ -1,0 +1,13 @@
+data:
+    root:       /users/alanman/eorsky/scripts/
+    subdirs:    '["eorsky_out/three_short_bl"]'
+    template:   'eorsky_out/three_short_bl/eorsky_24.00hours_0sky_uv'
+pspec:
+    baseline: '[(0,11),(0,12),(11,12)]'
+catalog:
+    sigma: 2.0   #Kelvin
+    Nside: 128   #Input map
+out:
+    overwrite : False
+    outdir: 'results'
+    version: 'eorsky_3blshort_nside128'

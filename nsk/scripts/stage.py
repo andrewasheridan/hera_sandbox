@@ -41,7 +41,10 @@ if __name__ == "__main__":
                 continue
             elif os.path.exists(fnew):
                 print("{} exists, overwriting".format(fnew))
-                shutil.rmtree(fnew)
+                try:
+                    shutil.rmtree(fnew)
+                except:
+                    os.remove(fnew)
             else:
                 print("copying {}".format(fnew))
             if os.path.isdir(f):

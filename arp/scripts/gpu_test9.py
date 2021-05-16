@@ -1,3 +1,5 @@
+#! /home/aparsons/miniconda3/envs/hera_ml/bin/python2.7
+
 GPU = False
 
 if GPU:
@@ -156,7 +158,7 @@ def vis_gpu(antpos, freq, eq2tops, crd_eq, I_sky, bm_cube,
     crd_eq = crd_eq.astype(real_dtype)
     Isqrt = np.sqrt(I_sky).astype(real_dtype)
     bm_cube = bm_cube.astype(real_dtype) # XXX complex?
-    chunk = max(MIN_CHUNK,2**int(ceil(np.log2(float(nant*npix) / max_memory / 2))))
+    chunk = max(min(npix,MIN_CHUNK),2**int(ceil(np.log2(float(nant*npix) / max_memory / 2))))
     npixc = npix / chunk
     # blocks of threads are mapped to (pixels,ants,freqs)
     block = (max(1,nthreads/nant), min(nthreads,nant), 1)
@@ -218,7 +220,7 @@ def vis_gpu(antpos, freq, eq2tops, crd_eq, I_sky, bm_cube,
                 bm_interp(crdtop_gpu, A_gpu, grid=grid, block=block, stream=stream)
                 events[cc]['interpolate'].record(stream)
                 # compute v = A * I * exp(1j*tau*freq)
-                meas_eq(A_gpu, Isqrt_gpu, tau_gpu, real_dtype(FREQ), v_gpu, 
+                meas_eq(A_gpu, Isqrt_gpu, tau_gpu, real_dtype(freq), v_gpu, 
                     grid=grid, block=block, stream=stream)
                 events[cc]['meas_eq'].record(stream)
                 # compute vis = dot(v, v.T)
@@ -341,27 +343,28 @@ def hmap_to_I(h):
     return h[np.arange(h.npix())].astype(np.float32)
 
 if __name__ == '__main__':
-    #NTIMES = 10000
-    NTIMES = 200
-    NFREQS = 100
+    #ROOT = '/Users'
+    ROOT = '/home'
+    NTIMES = 100
+    NFREQS = 1
     START_FQ, END_FQ = .1, .2
-    #START_JD, END_JD = 2458000, 2458001
-    START_JD, END_JD = 2458000.2, 2458000.8
+    START_JD, END_JD = 2458000, 2458001
+    #START_JD, END_JD = 2458000.2, 2458000.8
     freqs = np.linspace(START_FQ, END_FQ,NFREQS, endpoint=False)
     jds = np.linspace(START_JD, END_JD, NTIMES)
-    #FREQ = .150
 
     BEAM_PX = 63
-    GPU = False
-    #GSM = '/home/aparsons/projects/eor/maps/lambda_haslam408_dsds_eq.fits'
-    GSM = '/Users/aparsons/projects/eor/maps/lambda_haslam408_dsds_eq.fits'
-    BM_MDL = '/Users/aparsons/projects/eor/beam/hera-cst/mdl04/X4Y2H_4900_%3d.hmap'
-    VERBOSE = False
+    GSM = ROOT+'/aparsons/projects/eor/maps/lambda_haslam408_dsds_eq.fits'
+    BM_MDL = ROOT+'/aparsons/projects/eor/beam/hera-cst/mdl04/X4Y2H_4900_%3d.hmap'
+    VERBOSE = True
+    PLOT = False
 
     # Initialization of values on CPU side
     np.random.seed(0)
     ants = (80, 104, 96, 64, 53, 31, 65, 88, 9, 20, 89, 43, 105, 22, 81, 10, 72, 112, 97)
-    ants = ants[:4]
+    #ants = (128 / 16) * ants[:16]
+    ants = ants[:16]
+    #ants = ants[:4]
     import aipy
     #aa = aipy.cal.get_aa('hsa7458_v001', np.array([FREQ]))
     aa = aipy.cal.get_aa('hsa7458_v001', freqs)
@@ -371,14 +374,14 @@ if __name__ == '__main__':
     bm_hmaps = [aipy.healpix.HealpixMap(fromfits=(BM_MDL % (int(1000*fq)))) for fq in freqs]
     #bm_cubes = hmap_to_bm_cube([bm_hmap] * len(ants), beam_px=BEAM_PX)
     eq2tops = aa_to_eq2tops(aa, jds)
-    hmap = aipy.healpix.HealpixMap(fromfits=GSM)
-    #crd_eq = hmap_to_crd_eq(hmap)
-    #I_sky = np.random.normal(size=hmap.npix())
-    #I_sky = hmap_to_I(hmap)
-    crd_eq = np.dot(np.linalg.inv(eq2tops[NTIMES/2]), np.array([[0.],[0],[1]], dtype=np.float32))
+    gsm = aipy.healpix.HealpixMap(fromfits=GSM)
+    crd_eq = hmap_to_crd_eq(gsm)
+    #I_sky = np.random.normal(size=gsm.npix()) + 10.
+    I_sky = hmap_to_I(gsm)
+    #crd_eq = np.dot(np.linalg.inv(eq2tops[NTIMES/2]), np.array([[0.],[0],[1]], dtype=np.float32))
     #crd_eq = np.array([[0.],[1.],[0]], dtype=np.float32)
     #crd_eq = np.array([[0.,0],[1.,0],[0,-1]], dtype=np.float32)
-    I_sky = np.array([1.], dtype=np.float32)
+    #I_sky = np.array([1.], dtype=np.float32)
     #I_sky = np.array([1.,1], dtype=np.float32)
 
     ##crd_eq = np.random.uniform(size=(3,NPIX)).astype(real_dtype)
@@ -413,20 +416,29 @@ if __name__ == '__main__':
     if GPU: compute_vis = vis_gpu
     else: compute_vis = vis_cpu
     #bm_cubes = hmap_to_bm_cube([bm_hmap] * len(ants), beam_px=BEAM_PX)
-    vis = np.array([compute_vis(antpos, fq, eq2tops, crd_eq, I_sky * (fq/.408)**-2.5, 
-                                hmap_to_bm_cube([bm_hmaps[i]] * len(ants), beam_px=BEAM_PX), 
-                                verbose=VERBOSE) 
-                    for i,fq in enumerate(freqs)])
+    vis = []
+    for i,fq in enumerate(freqs):
+        print '=== FREQ %d/%d ===' % (i, len(freqs))
+        bm_cube = hmap_to_bm_cube([bm_hmaps[i]] * len(ants), beam_px=BEAM_PX)
+        #vis_ = compute_vis(antpos, fq, eq2tops, crd_eq, I_sky, bm_cube, verbose=VERBOSE)
+        vis_ = compute_vis(antpos, fq, eq2tops, crd_eq, I_sky * (fq/.408)**-2.5, bm_cube, verbose=VERBOSE)
+        vis.append(vis_)
+    vis = np.array(vis)
+    #vis = np.array([compute_vis(antpos, fq, eq2tops, crd_eq, I_sky,
+    #                            hmap_to_bm_cube([bm_hmaps[i]] * len(ants), beam_px=BEAM_PX), 
+    #                            verbose=VERBOSE) 
+    #                for i,fq in enumerate(freqs)])
     #print np.allclose(vis, 4)
     print 'Time elapsed:', time.time() - t_start
-    import pylab as plt, uvtools
-    #plt.plot(vis[:,0,1].real)
-    #plt.plot(vis[:,0,1].imag)
-    #plt.plot(np.abs(vis[NFREQS/2,:,0,1])**2)
-    #plt.show()
-    plt.subplot(121)
-    uvtools.plot.waterfall(vis[:,:,0,1], mode='phs')
-    plt.subplot(122)
-    uvtools.plot.waterfall(vis[:,:,0,1], mode='log', drng=4)
-    plt.show()
-    import IPython; IPython.embed()
+    if PLOT:
+        import pylab as plt, uvtools
+        #plt.plot(vis[:,0,1].real)
+        #plt.plot(vis[:,0,1].imag)
+        #plt.plot(np.abs(vis[NFREQS/2,:,0,1])**2)
+        #plt.show()
+        plt.subplot(121)
+        uvtools.plot.waterfall(vis[:,:,0,1], mode='phs')
+        plt.subplot(122)
+        uvtools.plot.waterfall(vis[:,:,0,1], mode='log', drng=4)
+        plt.show()
+    #import IPython; IPython.embed()

@@ -1,0 +1,30 @@
+#!/bin/bash
+#PBS -N extract_autos
+#PBS -q hera
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=48:00:00
+#PBS -l vmem=64g
+#PBS -j oe
+#PBS -o /lustre/aoc/projects/hera/rpascua/logs/h3c_autos_prep.out
+#PBS -m be
+#PBS -M r.pascua+nrao@berkeley.edu
+
+date
+source ~/.bashrc
+conda activate hera
+
+cd /lustre/aoc/projects/hera/H3C/
+declare obs_base=$(pwd)
+declare obsdays=$(ls -d 245*)
+declare saveto=/lustre/aoc/projects/hera/rpascua/rfi/narrowband_data
+
+cd /users/rpascua/hera_packages/hera_sandbox/rfp/scripts  
+for obsday in $obsdays; do
+    obsday=${obsday%/}
+    if [[ $obsday != 2458866 ]]; then
+        obsdir=${obs_base}/${obsday}
+        echo python extract_autos.py ${obsdir} ${saveto}
+        python extract_autos.py ${obsdir} ${saveto}
+    fi
+done
+date

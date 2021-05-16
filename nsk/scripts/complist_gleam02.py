@@ -13,9 +13,9 @@ import sys
 args = argparse.ArgumentParser(description="Run with casa as: casa -c complist_gleam02.py <args>")
 args.add_argument("-c", type=str, help="name of this script")
 args.add_argument("--image", default=False, action='store_true', help='make FITS image of model')
-args.add_argument("--freqs", default=None, type=str, help="comma-separated values for input into np.linspace({},{},{})")
-args.add_argument("--cell", default='45arcsec', type=str, help="image pixel size in arcsec")
-args.add_argument("--imsize", default=256, type=int, help="number of pixels in image")
+args.add_argument("--freqs", default=None, type=str, help="comma-separated values [MHz] for input into np.linspace({},{},{})")
+args.add_argument("--cell", default='200arcsec', type=str, help="image pixel size in arcsec")
+args.add_argument("--imsize", default=512, type=int, help="number of pixels in image")
 
 if __name__ == "__main__":
     a = args.parse_args()

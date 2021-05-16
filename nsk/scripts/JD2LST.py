@@ -16,7 +16,7 @@ def JD2LST(JD, longitude):
     Output:
     Local Apparent Sidreal Time in Hour Angle
     """
-    t = Time(JD, format='jd')
+    t = Time(JD, format='jd', scale='utc')
     return t.sidereal_time('apparent', longitude=longitude).value
 
 

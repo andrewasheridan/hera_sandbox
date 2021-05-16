@@ -1,0 +1,671 @@
+=== Device attributes
+Name: TITAN Xp
+Compute capability: (6, 1)
+Concurrent Kernels: True
+NANT: 128
+NPIX: 3145728
+NTIMES: 10
+NFREQS: 1
+Starting 1528908602.32
+=== FREQ 0/1 ===
+1/10
+0:8 START->END: 0.0199719352722
+0 start -> upload : 0.00346512007713
+0 upload -> eq2top : 0.00012256000191
+0 eq2top -> tau : 0.000608255982399
+0 tau -> interpolate : 0.00198307204247
+0 interpolate -> meas_eq : 0.00311747193336
+0 meas_eq -> vis : 0.0105897922516
+0 vis -> end : 8.56639966369e-05
+1:8 START->END: 0.0315839996338
+1 start -> upload : 0.00347862410545
+1 upload -> eq2top : 0.0119105920792
+1 eq2top -> tau : 0.000596671998501
+1 tau -> interpolate : 0.0018212480545
+1 interpolate -> meas_eq : 0.00311481595039
+1 meas_eq -> vis : 0.0105711040497
+1 vis -> end : 9.09439995885e-05
+2:8 START->END: 0.031941280365
+2 start -> upload : 0.00341846394539
+2 upload -> eq2top : 0.0126504955292
+2 eq2top -> tau : 0.00060051202774
+2 tau -> interpolate : 0.0015427839756
+2 interpolate -> meas_eq : 0.00311116790771
+2 meas_eq -> vis : 0.0105353279114
+2 vis -> end : 8.25280025601e-05
+3:8 START->END: 0.0317897605896
+3 start -> upload : 0.00331904006004
+3 upload -> eq2top : 0.0124116477966
+3 eq2top -> tau : 0.000596512019634
+3 tau -> interpolate : 0.00172828805447
+3 interpolate -> meas_eq : 0.00310992002487
+3 meas_eq -> vis : 0.0105416955948
+3 vis -> end : 8.26560035348e-05
+4:8 START->END: 0.0324662704468
+4 start -> upload : 0.00325462388992
+4 upload -> eq2top : 0.0126640644073
+4 eq2top -> tau : 0.000601920008659
+4 tau -> interpolate : 0.00209820795059
+4 interpolate -> meas_eq : 0.00311830401421
+4 meas_eq -> vis : 0.010576128006
+4 vis -> end : 0.00015302400291
+5:8 START->END: 0.0326581459045
+5 start -> upload : 0.00312070393562
+5 upload -> eq2top : 0.0132985601425
+5 eq2top -> tau : 0.00060009598732
+5 tau -> interpolate : 0.00185632002354
+5 interpolate -> meas_eq : 0.00311846399307
+5 meas_eq -> vis : 0.0105221757889
+5 vis -> end : 0.000141824007034
+6:8 START->END: 0.0326977615356
+6 start -> upload : 0.00308476805687
+6 upload -> eq2top : 0.0130304317474
+6 eq2top -> tau : 0.000600480020046
+6 tau -> interpolate : 0.00221779203415
+6 interpolate -> meas_eq : 0.00311139202118
+6 meas_eq -> vis : 0.0105085115433
+6 vis -> end : 0.000144383996725
+7:8 START->END: 0.0316568965912
+7 start -> upload : 0.0030574400425
+7 upload -> eq2top : 0.0134006719589
+7 eq2top -> tau : 0.000592703998089
+7 tau -> interpolate : 0.00181852805614
+7 interpolate -> meas_eq : 0.00305040001869
+7 meas_eq -> vis : 0.00958691215515
+7 vis -> end : 0.000150240004063
+TOTAL: 0.133413223267
+2/10
+0:8 START->END: 0.0183173751831
+0 start -> upload : 0.00349667191505
+0 upload -> eq2top : 6.22400008142e-05
+0 eq2top -> tau : 0.000591488003731
+0 tau -> interpolate : 0.00146384000778
+0 interpolate -> meas_eq : 0.00304899191856
+0 meas_eq -> vis : 0.00957161617279
+0 vis -> end : 8.25280025601e-05
+1:8 START->END: 0.0296882553101
+1 start -> upload : 0.00342537593842
+1 upload -> eq2top : 0.0112001600266
+1 eq2top -> tau : 0.000589056015015
+1 tau -> interpolate : 0.00171846401691
+1 interpolate -> meas_eq : 0.00305529594421
+1 meas_eq -> vis : 0.00961961555481
+1 vis -> end : 8.02880004048e-05
+2:8 START->END: 0.0296789112091
+2 start -> upload : 0.0034984960556
+2 upload -> eq2top : 0.0114379844666
+2 eq2top -> tau : 0.000589056015015
+2 tau -> interpolate : 0.00146092796326
+2 interpolate -> meas_eq : 0.0030503680706
+2 meas_eq -> vis : 0.00955360031128
+2 vis -> end : 8.84800031781e-05
+3:8 START->END: 0.0293121929169
+3 start -> upload : 0.00294550395012
+3 upload -> eq2top : 0.0116695356369
+3 eq2top -> tau : 0.00058771198988
+3 tau -> interpolate : 0.00141251194477
+3 interpolate -> meas_eq : 0.00305417609215
+3 meas_eq -> vis : 0.0095531835556
+3 vis -> end : 8.95679965615e-05
+4:8 START->END: 0.0299577922821
+4 start -> upload : 0.00350457596779
+4 upload -> eq2top : 0.011061504364
+4 eq2top -> tau : 0.000586080014706
+4 tau -> interpolate : 0.0020604159832
+4 interpolate -> meas_eq : 0.00304499197006
+4 meas_eq -> vis : 0.00961087989807
+4 vis -> end : 8.93440023065e-05
+5:8 START->END: 0.0302849273682
+5 start -> upload : 0.00352451205254
+5 upload -> eq2top : 0.0117296962738
+5 eq2top -> tau : 0.000587808012962
+5 tau -> interpolate : 0.00173148798943
+5 interpolate -> meas_eq : 0.00304790401459
+5 meas_eq -> vis : 0.00957753562927
+5 vis -> end : 8.59839990735e-05
+6:8 START->END: 0.0302266235352
+6 start -> upload : 0.00351020789146
+6 upload -> eq2top : 0.0114010877609
+6 eq2top -> tau : 0.000589568018913
+6 tau -> interpolate : 0.00197116804123
+6 interpolate -> meas_eq : 0.00305244803429
+6 meas_eq -> vis : 0.00961385631561
+6 vis -> end : 8.82880017161e-05
+7:8 START->END: 0.0304934711456
+7 start -> upload : 0.00351299190521
+7 upload -> eq2top : 0.0116773118973
+7 eq2top -> tau : 0.000594304025173
+7 tau -> interpolate : 0.00198176002502
+7 interpolate -> meas_eq : 0.00304614400864
+7 meas_eq -> vis : 0.00959132766724
+7 vis -> end : 8.96319970489e-05
+TOTAL: 0.12455632019
+3/10
+0:8 START->END: 0.0183346881866
+0 start -> upload : 0.00352415990829
+0 upload -> eq2top : 6.40640035272e-05
+0 eq2top -> tau : 0.000587872028351
+0 tau -> interpolate : 0.00141737604141
+0 interpolate -> meas_eq : 0.00305340790749
+0 meas_eq -> vis : 0.00960627174377
+0 vis -> end : 8.15360024571e-05
+1:8 START->END: 0.0286376953125
+1 start -> upload : 0.00349814391136
+1 upload -> eq2top : 0.0111193275452
+1 eq2top -> tau : 0.000588544011116
+1 tau -> interpolate : 0.00167200005054
+1 interpolate -> meas_eq : 0.00304419207573
+1 meas_eq -> vis : 0.00862892818451
+1 vis -> end : 8.65600034595e-05
+2:8 START->END: 0.0278309764862
+2 start -> upload : 0.00350444793701
+2 upload -> eq2top : 0.0103871364594
+2 eq2top -> tau : 0.000588544011116
+2 tau -> interpolate : 0.00155907201767
+2 interpolate -> meas_eq : 0.00303008008003
+2 meas_eq -> vis : 0.00867292785645
+2 vis -> end : 8.87679979205e-05
+3:8 START->END: 0.0275223045349
+3 start -> upload : 0.0035126080513
+3 upload -> eq2top : 0.0102901439667
+3 eq2top -> tau : 0.000588768005371
+3 tau -> interpolate : 0.00138080000877
+3 interpolate -> meas_eq : 0.00302649593353
+3 meas_eq -> vis : 0.00864015960693
+3 vis -> end : 8.33280012012e-05
+4:8 START->END: 0.0276564483643
+4 start -> upload : 0.00350380802155
+4 upload -> eq2top : 0.0100818881989
+4 eq2top -> tau : 0.000586943984032
+4 tau -> interpolate : 0.0016852799654
+4 interpolate -> meas_eq : 0.00303257608414
+4 meas_eq -> vis : 0.0086726398468
+4 vis -> end : 9.33120027184e-05
+5:8 START->END: 0.0279148159027
+5 start -> upload : 0.00349305605888
+5 upload -> eq2top : 0.0104450559616
+5 eq2top -> tau : 0.000589471995831
+5 tau -> interpolate : 0.00164031994343
+5 interpolate -> meas_eq : 0.00303129601479
+5 meas_eq -> vis : 0.00863507175446
+5 vis -> end : 8.05440023541e-05
+6:8 START->END: 0.0278551044464
+6 start -> upload : 0.00351295995712
+6 upload -> eq2top : 0.0103349123001
+6 eq2top -> tau : 0.000587743997574
+6 tau -> interpolate : 0.00165062403679
+6 interpolate -> meas_eq : 0.00303350400925
+6 meas_eq -> vis : 0.00861654376984
+6 vis -> end : 0.000118816003203
+7:8 START->END: 0.0282245121002
+7 start -> upload : 0.0034984960556
+7 upload -> eq2top : 0.0104486398697
+7 eq2top -> tau : 0.000589088022709
+7 tau -> interpolate : 0.00186665594578
+7 interpolate -> meas_eq : 0.00302636790276
+7 meas_eq -> vis : 0.00870928001404
+7 vis -> end : 8.59839990735e-05
+TOTAL: 0.117093154907
+4/10
+0:8 START->END: 0.0174018249512
+0 start -> upload : 0.0037743999958
+0 upload -> eq2top : 5.83040006459e-05
+0 eq2top -> tau : 0.000589088022709
+0 tau -> interpolate : 0.00128412795067
+0 interpolate -> meas_eq : 0.00303059196472
+0 meas_eq -> vis : 0.00858668804169
+0 vis -> end : 7.86240026355e-05
+1:8 START->END: 0.0271195831299
+1 start -> upload : 0.00349411201477
+1 upload -> eq2top : 0.00995177555084
+1 eq2top -> tau : 0.000588735997677
+1 tau -> interpolate : 0.00136211204529
+1 interpolate -> meas_eq : 0.00303708791733
+1 meas_eq -> vis : 0.00860300827026
+1 vis -> end : 8.27519968152e-05
+2:8 START->END: 0.0275840969086
+2 start -> upload : 0.00351228809357
+2 upload -> eq2top : 0.0100279998779
+2 eq2top -> tau : 0.000588064014912
+2 tau -> interpolate : 0.00172867202759
+2 interpolate -> meas_eq : 0.00303001594543
+2 meas_eq -> vis : 0.0086082239151
+2 vis -> end : 8.88319984078e-05
+3:8 START->END: 0.027662815094
+3 start -> upload : 0.00350771188736
+3 upload -> eq2top : 0.0104019203186
+3 eq2top -> tau : 0.000589088022709
+3 tau -> interpolate : 0.00147398400307
+3 interpolate -> meas_eq : 0.00302998399734
+3 meas_eq -> vis : 0.00857017612457
+3 vis -> end : 8.99519994855e-05
+4:8 START->END: 0.0272836799622
+4 start -> upload : 0.00350044798851
+4 upload -> eq2top : 0.0101232318878
+4 eq2top -> tau : 0.000589471995831
+4 tau -> interpolate : 0.00146319997311
+4 interpolate -> meas_eq : 0.00302435207367
+4 meas_eq -> vis : 0.00849900817871
+4 vis -> end : 8.39679986238e-05
+5:8 START->END: 0.0271116790771
+5 start -> upload : 0.00349734401703
+5 upload -> eq2top : 0.0100239677429
+5 eq2top -> tau : 0.000591520011425
+5 tau -> interpolate : 0.00168371200562
+5 interpolate -> meas_eq : 0.00302502393723
+5 meas_eq -> vis : 0.00821145629883
+5 vis -> end : 7.86560028791e-05
+6:8 START->END: 0.0268096637726
+6 start -> upload : 0.00346185588837
+6 upload -> eq2top : 0.0100093755722
+6 eq2top -> tau : 0.000587296009064
+6 tau -> interpolate : 0.00148982405663
+6 interpolate -> meas_eq : 0.00302191996574
+6 meas_eq -> vis : 0.00815702438354
+6 vis -> end : 8.23680013418e-05
+7:8 START->END: 0.0269530239105
+7 start -> upload : 0.00351334404945
+7 upload -> eq2top : 0.00970835208893
+7 eq2top -> tau : 0.000591520011425
+7 tau -> interpolate : 0.00178300797939
+7 interpolate -> meas_eq : 0.00301519989967
+7 meas_eq -> vis : 0.00826044845581
+7 vis -> end : 8.11519995332e-05
+TOTAL: 0.113856002808
+5/10
+0:8 START->END: 0.0164218235016
+0 start -> upload : 0.003130464077
+0 upload -> eq2top : 4.99840006232e-05
+0 eq2top -> tau : 0.000588127970695
+0 tau -> interpolate : 0.00138803195953
+0 interpolate -> meas_eq : 0.00303097605705
+0 meas_eq -> vis : 0.00815737628937
+0 vis -> end : 7.68639966846e-05
+1:8 START->END: 0.0262490882874
+1 start -> upload : 0.00309353590012
+1 upload -> eq2top : 0.0100571842194
+1 eq2top -> tau : 0.000587808012962
+1 tau -> interpolate : 0.00122812795639
+1 interpolate -> meas_eq : 0.00303078389168
+1 meas_eq -> vis : 0.00817481613159
+1 vis -> end : 7.68319964409e-05
+2:8 START->END: 0.0266079368591
+2 start -> upload : 0.00301807999611
+2 upload -> eq2top : 0.00998246383667
+2 eq2top -> tau : 0.000586175978184
+2 tau -> interpolate : 0.00166240000725
+2 interpolate -> meas_eq : 0.00303855991364
+2 meas_eq -> vis : 0.00824310398102
+2 vis -> end : 7.71519988775e-05
+3:8 START->END: 0.0271362247467
+3 start -> upload : 0.00294051194191
+3 upload -> eq2top : 0.0105635204315
+3 eq2top -> tau : 0.000586207985878
+3 tau -> interpolate : 0.00152547204494
+3 interpolate -> meas_eq : 0.00302780795097
+3 meas_eq -> vis : 0.00841363239288
+3 vis -> end : 7.90719985962e-05
+4:8 START->END: 0.0270536003113
+4 start -> upload : 0.00289817595482
+4 upload -> eq2top : 0.0106263999939
+4 eq2top -> tau : 0.000590784013271
+4 tau -> interpolate : 0.00142838394642
+4 interpolate -> meas_eq : 0.00304140806198
+4 meas_eq -> vis : 0.00838937568665
+4 vis -> end : 7.90719985962e-05
+5:8 START->END: 0.0271842880249
+5 start -> upload : 0.00284921598434
+5 upload -> eq2top : 0.0105819835663
+5 eq2top -> tau : 0.000587199985981
+5 tau -> interpolate : 0.00170361602306
+5 interpolate -> meas_eq : 0.00302880001068
+5 meas_eq -> vis : 0.00835996818542
+5 vis -> end : 7.35040009022e-05
+6:8 START->END: 0.0273775672913
+6 start -> upload : 0.00280832004547
+6 upload -> eq2top : 0.0108567361832
+6 eq2top -> tau : 0.000586080014706
+6 tau -> interpolate : 0.00154262399673
+6 interpolate -> meas_eq : 0.00302883195877
+6 meas_eq -> vis : 0.00847408008575
+6 vis -> end : 8.08959975839e-05
+7:8 START->END: 0.0273947200775
+7 start -> upload : 0.00332150411606
+7 upload -> eq2top : 0.0102963199615
+7 eq2top -> tau : 0.000593792021275
+7 tau -> interpolate : 0.00168121600151
+7 interpolate -> meas_eq : 0.00301555204391
+7 meas_eq -> vis : 0.00840358352661
+7 vis -> end : 8.27519968152e-05
+TOTAL: 0.112123680115
+6/10
+0:8 START->END: 0.0170862083435
+0 start -> upload : 0.00331667208672
+0 upload -> eq2top : 5.20640015602e-05
+0 eq2top -> tau : 0.000591008007526
+0 tau -> interpolate : 0.00153382396698
+0 interpolate -> meas_eq : 0.00303276801109
+0 meas_eq -> vis : 0.00848095989227
+0 vis -> end : 7.89119973779e-05
+1:8 START->END: 0.0268771514893
+1 start -> upload : 0.00331791996956
+1 upload -> eq2top : 0.0103278722763
+1 eq2top -> tau : 0.000586624026299
+1 tau -> interpolate : 0.00123654401302
+1 interpolate -> meas_eq : 0.00302956795692
+1 meas_eq -> vis : 0.00830118370056
+1 vis -> end : 7.74400010705e-05
+2:8 START->END: 0.0268986244202
+2 start -> upload : 0.00331769609451
+2 upload -> eq2top : 0.00981167984009
+2 eq2top -> tau : 0.00059017598629
+2 tau -> interpolate : 0.00155327999592
+2 interpolate -> meas_eq : 0.0030443520546
+2 meas_eq -> vis : 0.00835203170776
+2 vis -> end : 0.000229407995939
+3:8 START->END: 0.0276788158417
+3 start -> upload : 0.00330521607399
+3 upload -> eq2top : 0.0105126075745
+3 eq2top -> tau : 0.000618496000767
+3 tau -> interpolate : 0.00173974394798
+3 interpolate -> meas_eq : 0.00303318405151
+3 meas_eq -> vis : 0.00833353614807
+3 vis -> end : 0.000136032000184
+4:8 START->END: 0.0266007041931
+4 start -> upload : 0.0038469440937
+4 upload -> eq2top : 0.00940905570984
+4 eq2top -> tau : 0.000589215993881
+4 tau -> interpolate : 0.00129308795929
+4 interpolate -> meas_eq : 0.00303881597519
+4 meas_eq -> vis : 0.00828649616241
+4 vis -> end : 0.000137088000774
+5:8 START->END: 0.0269338245392
+5 start -> upload : 0.00331382393837
+5 upload -> eq2top : 0.0099057598114
+5 eq2top -> tau : 0.000598047971725
+5 tau -> interpolate : 0.00161977601051
+5 interpolate -> meas_eq : 0.0030458240509
+5 meas_eq -> vis : 0.00831347179413
+5 vis -> end : 0.000137119993567
+6:8 START->END: 0.0270578231812
+6 start -> upload : 0.00318447995186
+6 upload -> eq2top : 0.0102307519913
+6 eq2top -> tau : 0.000595488011837
+6 tau -> interpolate : 0.00158435201645
+6 interpolate -> meas_eq : 0.00303852796555
+6 meas_eq -> vis : 0.00830047988892
+6 vis -> end : 0.000123744003475
+7:8 START->END: 0.0270560646057
+7 start -> upload : 0.00304515194893
+7 upload -> eq2top : 0.010316576004
+7 eq2top -> tau : 0.000596704006195
+7 tau -> interpolate : 0.00164256000519
+7 interpolate -> meas_eq : 0.00302451205254
+7 meas_eq -> vis : 0.00831206417084
+7 vis -> end : 0.000118496000767
+TOTAL: 0.113207199097
+7/10
+0:8 START->END: 0.0162445755005
+0 start -> upload : 0.00249622392654
+0 upload -> eq2top : 5.84320016205e-05
+0 eq2top -> tau : 0.000587552011013
+0 tau -> interpolate : 0.0015604159832
+0 interpolate -> meas_eq : 0.00303465604782
+0 meas_eq -> vis : 0.00839225578308
+0 vis -> end : 0.000115039996803
+1:8 START->END: 0.0269398078918
+1 start -> upload : 0.00245449590683
+1 upload -> eq2top : 0.0110632638931
+1 eq2top -> tau : 0.000588415980339
+1 tau -> interpolate : 0.00132553601265
+1 interpolate -> meas_eq : 0.00304364800453
+1 meas_eq -> vis : 0.0083482875824
+1 vis -> end : 0.00011615999788
+2:8 START->END: 0.0268262081146
+2 start -> upload : 0.00241097593307
+2 upload -> eq2top : 0.0108592319489
+2 eq2top -> tau : 0.000589568018913
+2 tau -> interpolate : 0.00141750395298
+2 interpolate -> meas_eq : 0.0030443520546
+2 meas_eq -> vis : 0.00839011192322
+2 vis -> end : 0.000114463999867
+3:8 START->END: 0.0273446407318
+3 start -> upload : 0.00236230397224
+3 upload -> eq2top : 0.0110550403595
+3 eq2top -> tau : 0.000588352024555
+3 tau -> interpolate : 0.00177807998657
+3 interpolate -> meas_eq : 0.0030528960228
+3 meas_eq -> vis : 0.00838099193573
+3 vis -> end : 0.000126975998282
+4:8 START->END: 0.0273109760284
+4 start -> upload : 0.00233948802948
+4 upload -> eq2top : 0.0114533119202
+4 eq2top -> tau : 0.000588127970695
+4 tau -> interpolate : 0.00130582404137
+4 interpolate -> meas_eq : 0.00306064009666
+4 meas_eq -> vis : 0.00844185638428
+4 vis -> end : 0.000121728003025
+5:8 START->END: 0.0273065280914
+5 start -> upload : 0.00236041593552
+5 upload -> eq2top : 0.0110236797333
+5 eq2top -> tau : 0.000589375972748
+5 tau -> interpolate : 0.00165094399452
+5 interpolate -> meas_eq : 0.00305516791344
+5 meas_eq -> vis : 0.0085143995285
+5 vis -> end : 0.000112544000149
+6:8 START->END: 0.0277885112762
+6 start -> upload : 0.00234134411812
+6 upload -> eq2top : 0.0114164800644
+6 eq2top -> tau : 0.000588256001472
+6 tau -> interpolate : 0.00176953601837
+6 interpolate -> meas_eq : 0.00304179191589
+6 meas_eq -> vis : 0.00850873565674
+6 vis -> end : 0.000122368000448
+7:8 START->END: 0.0277293434143
+7 start -> upload : 0.00234454393387
+7 upload -> eq2top : 0.0115543355942
+7 eq2top -> tau : 0.00059763199091
+7 tau -> interpolate : 0.00156710398197
+7 interpolate -> meas_eq : 0.00305177593231
+7 meas_eq -> vis : 0.00848899173737
+7 vis -> end : 0.000124959997833
+TOTAL: 0.113100669861
+8/10
+0:8 START->END: 0.0162459831238
+0 start -> upload : 0.00235360002518
+0 upload -> eq2top : 5.64480014145e-05
+0 eq2top -> tau : 0.000587552011013
+0 tau -> interpolate : 0.00157206404209
+0 interpolate -> meas_eq : 0.00304940795898
+0 meas_eq -> vis : 0.0085093755722
+0 vis -> end : 0.000117536000907
+1:8 START->END: 0.0273382720947
+1 start -> upload : 0.00235520005226
+1 upload -> eq2top : 0.0113501443863
+1 eq2top -> tau : 0.000589856028557
+1 tau -> interpolate : 0.00137443196774
+1 interpolate -> meas_eq : 0.00304867196083
+1 meas_eq -> vis : 0.00850630378723
+1 vis -> end : 0.000113664001226
+2:8 START->END: 0.0271432952881
+2 start -> upload : 0.00234326410294
+2 upload -> eq2top : 0.0111549444199
+2 eq2top -> tau : 0.00058790397644
+2 tau -> interpolate : 0.0013630399704
+2 interpolate -> meas_eq : 0.00304867196083
+2 meas_eq -> vis : 0.00852735996246
+2 vis -> end : 0.000118111997843
+3:8 START->END: 0.0274260807037
+3 start -> upload : 0.00235027194023
+3 upload -> eq2top : 0.0111634559631
+3 eq2top -> tau : 0.000589088022709
+3 tau -> interpolate : 0.00164444804192
+3 interpolate -> meas_eq : 0.00306092810631
+3 meas_eq -> vis : 0.00849993610382
+3 vis -> end : 0.000117951996624
+4:8 START->END: 0.0274807682037
+4 start -> upload : 0.00233132791519
+4 upload -> eq2top : 0.0114320001602
+4 eq2top -> tau : 0.000587040007114
+4 tau -> interpolate : 0.0015312319994
+4 interpolate -> meas_eq : 0.00303289604187
+4 meas_eq -> vis : 0.0084479675293
+4 vis -> end : 0.000118303999305
+5:8 START->END: 0.0275495681763
+5 start -> upload : 0.0023660159111
+5 upload -> eq2top : 0.0112243518829
+5 eq2top -> tau : 0.000590304017067
+5 tau -> interpolate : 0.00163699197769
+5 interpolate -> meas_eq : 0.00305353593826
+5 meas_eq -> vis : 0.00856758403778
+5 vis -> end : 0.000110784001648
+6:8 START->END: 0.0278626556396
+6 start -> upload : 0.00233811211586
+6 upload -> eq2top : 0.0114737596512
+6 eq2top -> tau : 0.00058656001091
+6 tau -> interpolate : 0.00177465605736
+6 interpolate -> meas_eq : 0.00304316806793
+6 meas_eq -> vis : 0.00853545570374
+6 vis -> end : 0.000110944002867
+7:8 START->END: 0.0277032318115
+7 start -> upload : 0.00234396791458
+7 upload -> eq2top : 0.0115784959793
+7 eq2top -> tau : 0.000599008023739
+7 tau -> interpolate : 0.00152028799057
+7 interpolate -> meas_eq : 0.0030231359005
+7 meas_eq -> vis : 0.0085206079483
+7 vis -> end : 0.000117728002369
+TOTAL: 0.113580253601
+9/10
+0:8 START->END: 0.0158128957748
+0 start -> upload : 0.00229046392441
+0 upload -> eq2top : 5.58720007539e-05
+0 eq2top -> tau : 0.000589439988136
+0 tau -> interpolate : 0.00142390394211
+0 interpolate -> meas_eq : 0.00305040001869
+0 meas_eq -> vis : 0.00829465579987
+0 vis -> end : 0.000108159996569
+1:8 START->END: 0.0267848968506
+1 start -> upload : 0.00227212810516
+1 upload -> eq2top : 0.0110750722885
+1 eq2top -> tau : 0.000591584026814
+1 tau -> interpolate : 0.00141584002972
+1 interpolate -> meas_eq : 0.00303862404823
+1 meas_eq -> vis : 0.00828281593323
+1 vis -> end : 0.000108832001686
+2:8 START->END: 0.0265518398285
+2 start -> upload : 0.00228435206413
+2 upload -> eq2top : 0.0110118083954
+2 eq2top -> tau : 0.000588479995728
+2 tau -> interpolate : 0.0012346559763
+2 interpolate -> meas_eq : 0.00304150390625
+2 meas_eq -> vis : 0.00828764820099
+2 vis -> end : 0.000103391997516
+3:8 START->END: 0.0267568950653
+3 start -> upload : 0.002257791996
+3 upload -> eq2top : 0.0108616323471
+3 eq2top -> tau : 0.000586880028248
+3 tau -> interpolate : 0.00159558403492
+3 interpolate -> meas_eq : 0.0030382399559
+3 meas_eq -> vis : 0.0082971200943
+3 vis -> end : 0.000119648002088
+4:8 START->END: 0.0271639671326
+4 start -> upload : 0.00226924800873
+4 upload -> eq2top : 0.0112391357422
+4 eq2top -> tau : 0.000586304008961
+4 tau -> interpolate : 0.00162815999985
+4 interpolate -> meas_eq : 0.00305267190933
+4 meas_eq -> vis : 0.00826134395599
+4 vis -> end : 0.000127103999257
+5:8 START->END: 0.0272723522186
+5 start -> upload : 0.00239187192917
+5 upload -> eq2top : 0.0111417284012
+5 eq2top -> tau : 0.00058656001091
+5 tau -> interpolate : 0.00153401601315
+5 interpolate -> meas_eq : 0.00305907201767
+5 meas_eq -> vis : 0.00844032001495
+5 vis -> end : 0.00011878400296
+6:8 START->END: 0.0277590408325
+6 start -> upload : 0.0023706240654
+6 upload -> eq2top : 0.0111772480011
+6 eq2top -> tau : 0.000593024015427
+6 tau -> interpolate : 0.00183353602886
+6 interpolate -> meas_eq : 0.00305219197273
+6 meas_eq -> vis : 0.00852201557159
+6 vis -> end : 0.000210400000215
+7:8 START->END: 0.0281194553375
+7 start -> upload : 0.00236035203934
+7 upload -> eq2top : 0.0118711996078
+7 eq2top -> tau : 0.000616191983223
+7 tau -> interpolate : 0.00159561598301
+7 interpolate -> meas_eq : 0.0030277121067
+7 meas_eq -> vis : 0.00851715183258
+7 vis -> end : 0.000131231993437
+TOTAL: 0.112440063477
+10/10
+0:8 START->END: 0.0177361602783
+0 start -> upload : 0.00403753614426
+0 upload -> eq2top : 8.32000002265e-05
+0 eq2top -> tau : 0.000598655998707
+0 tau -> interpolate : 0.00142928004265
+0 interpolate -> meas_eq : 0.003025151968
+0 meas_eq -> vis : 0.0084560956955
+0 vis -> end : 0.00010623999685
+1:8 START->END: 0.0269925765991
+1 start -> upload : 0.00400249576569
+1 upload -> eq2top : 0.0093041601181
+1 eq2top -> tau : 0.000590431988239
+1 tau -> interpolate : 0.00150217604637
+1 interpolate -> meas_eq : 0.00303548789024
+1 meas_eq -> vis : 0.00846191978455
+1 vis -> end : 9.59040001035e-05
+2:8 START->END: 0.0268768005371
+2 start -> upload : 0.00393046402931
+2 upload -> eq2top : 0.00951200008392
+2 eq2top -> tau : 0.000587935984135
+2 tau -> interpolate : 0.00125222396851
+2 interpolate -> meas_eq : 0.00302732801437
+2 meas_eq -> vis : 0.00846656036377
+2 vis -> end : 0.000100288003683
+3:8 START->END: 0.0268015365601
+3 start -> upload : 0.00383203196526
+3 upload -> eq2top : 0.00937382411957
+3 eq2top -> tau : 0.000589887976646
+3 tau -> interpolate : 0.00141900801659
+3 interpolate -> meas_eq : 0.00303075194359
+3 meas_eq -> vis : 0.00845359992981
+3 vis -> end : 0.000102431997657
+4:8 START->END: 0.026927936554
+4 start -> upload : 0.00376201605797
+4 upload -> eq2top : 0.00962921619415
+4 eq2top -> tau : 0.000587199985981
+4 tau -> interpolate : 0.00168220794201
+4 interpolate -> meas_eq : 0.00301299190521
+4 meas_eq -> vis : 0.00816556835175
+4 vis -> end : 8.87359976768e-05
+5:8 START->END: 0.0267491512299
+5 start -> upload : 0.00363766407967
+5 upload -> eq2top : 0.00971801567078
+5 eq2top -> tau : 0.000589983999729
+5 tau -> interpolate : 0.00147948801517
+5 interpolate -> meas_eq : 0.00302508807182
+5 meas_eq -> vis : 0.00821526432037
+5 vis -> end : 8.36480036378e-05
+6:8 START->END: 0.0269705600739
+6 start -> upload : 0.00359251189232
+6 upload -> eq2top : 0.00964624023438
+6 eq2top -> tau : 0.00058790397644
+6 tau -> interpolate : 0.00180294394493
+6 interpolate -> meas_eq : 0.0030232000351
+6 meas_eq -> vis : 0.00822406387329
+6 vis -> end : 9.36959981918e-05
+7:8 START->END: 0.0273573436737
+7 start -> upload : 0.0035524160862
+7 upload -> eq2top : 0.0100252161026
+7 eq2top -> tau : 0.00059084802866
+7 tau -> interpolate : 0.00161990404129
+7 interpolate -> meas_eq : 0.00302144002914
+7 meas_eq -> vis : 0.00846051216125
+7 vis -> end : 8.70079994202e-05
+TOTAL: 0.113639938354
+Time elapsed: 1.77182197571
